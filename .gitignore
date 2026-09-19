@@ -1,0 +1,10 @@
+bin/
+obj/
+.vs/
+*.user
+packages/
+.kilo/node_modules/
+*.binlog
+ActivityLog*.xml
+/.kilo
+/miscellaneous
