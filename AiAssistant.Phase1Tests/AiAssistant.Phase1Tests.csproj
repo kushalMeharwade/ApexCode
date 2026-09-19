@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AiAssistant.Core\AiAssistant.Core.csproj" />
+    <ProjectReference Include="..\AiAssistant.Llm\AiAssistant.Llm.csproj" />
+    <ProjectReference Include="..\AiAssistant.Engine\AiAssistant.Engine.csproj" />
+  <PackageReference Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" /></ItemGroup>
+
+</Project>

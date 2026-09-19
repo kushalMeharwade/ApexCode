@@ -1,0 +1,218 @@
+<UserControl x:Class="AiAssistant.UI.Controls.WelcomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/AiAssistant.UI;component/Themes/ControlStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/AiAssistant.UI;component/Themes/DarkTheme.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
+            <Style x:Key="DotIndicatorStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="{DynamicResource BorderSubtleBrush}" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="8" />
+                <Setter Property="Margin" Value="4,0" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border Background="{TemplateBinding Background}" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" CornerRadius="4">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Opacity" Value="0.6"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Opacity" Value="1"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource AccentPrimaryBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Width" Value="24" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="NavButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource SurfaceColorBrush}" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource SurfaceTertiaryBrush}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Background="{DynamicResource PanelBackgroundBrush}">
+        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="500">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" x:Name="HeaderSection" Opacity="0">
+                <StackPanel.RenderTransform>
+                    <TranslateTransform Y="20"/>
+                </StackPanel.RenderTransform>
+                <!-- Animated Header -->
+                <StackPanel HorizontalAlignment="Center" Margin="0,0,0,12">
+                    <!-- Swapped to the high-res 256x256 icon to allow it to be larger and crisp -->
+                    <Image x:Name="ApexCodeLogo" Source="pack://application:,,,/AiAssistant.UI;component/Resources/256x256.png" Width="64" Height="64" Margin="0,12,0,8" HorizontalAlignment="Center">
+                        <Image.RenderTransform>
+                            <TranslateTransform Y="0"/>
+                        </Image.RenderTransform>
+                    </Image>
+                    <TextBlock Text="Write, understand, and fix code — without leaving your IDE" FontSize="15" FontWeight="Bold" 
+                               Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock Text="Your AI coding companion for Visual Studio. Ask questions, generate code, and debug faster—right inside your IDE." FontSize="12" 
+                           Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="24,0,24,16" />
+            </StackPanel>
+            
+            <!-- Features List -->
+            <StackPanel x:Name="FeaturesSection" Grid.Row="1" Margin="0,0,0,16" MaxWidth="460" Opacity="0">
+                <StackPanel.RenderTransform>
+                    <TranslateTransform Y="20"/>
+                </StackPanel.RenderTransform>
+                <Grid x:Name="CarouselContainer">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    
+                    <Border Grid.Row="0" Background="{DynamicResource SurfaceColorBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="{StaticResource MediumRadius}">
+                        <Grid>
+                            <!-- Progress Bar -->
+                            <Rectangle Height="3" Fill="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Stretch" VerticalAlignment="Top" RenderTransformOrigin="0,0">
+                                <Rectangle.RenderTransform>
+                                    <ScaleTransform x:Name="ProgressScale" ScaleX="0" />
+                                </Rectangle.RenderTransform>
+                            </Rectangle>
+
+                            <Grid x:Name="FeatureCardsGrid" Margin="36,16,36,16" MinHeight="72">
+                                <!-- List Item 1 -->
+                                <Grid x:Name="FeatureItem1" Opacity="1">
+                                    <Grid.RenderTransform>
+                                        <TranslateTransform X="0" />
+                                    </Grid.RenderTransform>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="#2D2140" Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <TextBlock Text="✨" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Code Generation" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,2"/>
+                                        <TextBlock Text="Ask questions, request modifications, or generate frameworks." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+            
+                                <!-- List Item 2 -->
+                                <Grid x:Name="FeatureItem2" Opacity="0">
+                                    <Grid.RenderTransform>
+                                        <TranslateTransform X="20" />
+                                    </Grid.RenderTransform>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="#1E2B45" Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <TextBlock Text="🔍" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Project Context" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,2"/>
+                                        <TextBlock Text="ApexCode understands your active file and project architecture." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+            
+                                <!-- List Item 3 -->
+                                <Grid x:Name="FeatureItem3" Opacity="0">
+                                    <Grid.RenderTransform>
+                                        <TranslateTransform X="20" />
+                                    </Grid.RenderTransform>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="#1A3333" Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <TextBlock Text="🐛" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Smart Debugging" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,2"/>
+                                        <TextBlock Text="Paste an error or stack trace — get a diagnosis and suggested fix in seconds." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+            
+                                <!-- List Item 4 -->
+                                <Grid x:Name="FeatureItem4" Opacity="0">
+                                    <Grid.RenderTransform>
+                                        <TranslateTransform X="20" />
+                                    </Grid.RenderTransform>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" Background="#2B2D31" Width="40" Height="40" CornerRadius="10" Margin="0,0,12,0" VerticalAlignment="Center">
+                                        <TextBlock Text="⚙️" FontSize="20" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="Profiles &amp; Custom LLMs" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,2"/>
+                                        <TextBlock Text="Set roles like 'Angular Developer' and use your preferred LLM providers." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+
+                            <!-- Navigation Arrows -->
+                            <Button x:Name="PrevButton" Click="PrevButton_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0" Width="24" Height="24" Style="{StaticResource NavButtonStyle}" Content="&lt;"/>
+                            <Button x:Name="NextButton" Click="NextButton_Click" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" Width="24" Height="24" Style="{StaticResource NavButtonStyle}" Content="&gt;"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Indicators -->
+                    <StackPanel x:Name="IndicatorsPanel" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
+                        <RadioButton x:Name="Indicator0" GroupName="CarouselDots" IsChecked="True" Style="{StaticResource DotIndicatorStyle}" Click="Indicator_Click" Tag="0" />
+                        <RadioButton x:Name="Indicator1" GroupName="CarouselDots" Style="{StaticResource DotIndicatorStyle}" Click="Indicator_Click" Tag="1" />
+                        <RadioButton x:Name="Indicator2" GroupName="CarouselDots" Style="{StaticResource DotIndicatorStyle}" Click="Indicator_Click" Tag="2" />
+                        <RadioButton x:Name="Indicator3" GroupName="CarouselDots" Style="{StaticResource DotIndicatorStyle}" Click="Indicator_Click" Tag="3" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+
+            <!-- Action Button -->
+            <Button Grid.Row="2" x:Name="GetStartedButton" Content="Let's Get Started" 
+                    Style="{StaticResource PrimaryButton}" Opacity="0"
+                    FontSize="14" Padding="24,10" MinWidth="200"
+                    HorizontalAlignment="Center" Click="GetStartedButton_Click" Margin="0,0,0,12">
+                <Button.RenderTransform>
+                    <TranslateTransform Y="20"/>
+                </Button.RenderTransform>
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS8632</NoWarn>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AiAssistant.Core\AiAssistant.Core.csproj" />
+    <ProjectReference Include="..\AiAssistant.Engine\AiAssistant.Engine.csproj" />
+    <ProjectReference Include="..\AiAssistant.Storage\AiAssistant.Storage.csproj" />
+    <ProjectReference Include="..\AiAssistant.Llm\AiAssistant.Llm.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+  </ItemGroup>
+
+
+
+  <ItemGroup>
+    <Resource Include="Resources\logo.png" />
+    <Resource Include="Resources\16X16.png" />
+    <Resource Include="Resources\32x32.png" />
+    <Resource Include="Resources\48X48.png" />
+    <Resource Include="Resources\256x256.png" />
+    <Resource Include="Resources\ProviderLogos\openai.svg" />
+    <Resource Include="Resources\ProviderLogos\openrouter.svg" />
+    <Resource Include="Resources\ProviderLogos\deepseek.svg" />
+    <Resource Include="Resources\ProviderLogos\gemini.svg" />
+    <Resource Include="Resources\ProviderLogos\nvidia.svg" />
+    <Resource Include="Resources\ProviderLogos\vercel.svg" />
+    <Resource Include="Resources\ProviderLogos\generic.svg" />
+    <Resource Include="Resources\PersonaLogos\angular.svg" />
+    <Resource Include="Resources\PersonaLogos\aspnetcore.svg" />
+    <Resource Include="Resources\PersonaLogos\azure.svg" />
+    <Resource Include="Resources\PersonaLogos\blazor.svg" />
+    <Resource Include="Resources\PersonaLogos\cpp.svg" />
+    <Resource Include="Resources\PersonaLogos\maui.svg" />
+    <Resource Include="Resources\PersonaLogos\sqlserver.svg" />
+    <Resource Include="Resources\PersonaLogos\unity.svg" />
+    <Resource Include="Resources\PersonaLogos\unreal-cpp.svg" />
+    <Resource Include="Resources\PersonaLogos\vsix.svg" />
+    <Resource Include="Resources\PersonaLogos\winforms.svg" />
+    <Resource Include="Resources\PersonaLogos\wpf.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI.Markdown" />
+    <PackageReference Include="AvalonEdit" />
+    <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" />
+    <PackageReference Include="SharpVectors" />
+  </ItemGroup>
+
+</Project>

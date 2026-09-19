@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AiAssistant.Storage\AiAssistant.Storage.csproj" />
+    <ProjectReference Include="..\AiAssistant.Core\AiAssistant.Core.csproj" />
+    <ProjectReference Include="..\AiAssistant.Engine\AiAssistant.Engine.csproj" />
+    <ProjectReference Include="..\AiAssistant.Llm\AiAssistant.Llm.csproj" />
+    <ProjectReference Include="..\AiAssistant.Tools\AiAssistant.Tools.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ApexCode\Services\ChatService.cs" Link="Services\ChatService.cs" />
+    <Compile Include="..\ApexCode\Services\SolutionExplorerRefreshCommand.cs" Link="Services\SolutionExplorerRefreshCommand.cs" />
+    <Compile Include="..\ApexCode\Services\ExplorerRefreshScheduler.cs" Link="Services\ExplorerRefreshScheduler.cs" />
+    <Compile Include="..\ApexCode\Services\IInfoBarService.cs" Link="Services\IInfoBarService.cs" />
+    <Compile Include="..\ApexCode\Services\StatusBarService.cs" Link="Services\StatusBarService.cs" />
+    <Compile Include="..\ApexCode\Tools\DatabaseQueryToolExecutor.cs" Link="Tools\DatabaseQueryToolExecutor.cs" />
+    <Compile Include="..\ApexCode\Helpers\DatabaseConnectionHelper.cs" Link="Helpers\DatabaseConnectionHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Engine\DependencyGraphTests.cs" />
+    <Compile Remove="Engine\ProjectGraphTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Moq" />
+  </ItemGroup>
+
+  <!-- The SDK marks COM contracts as compile-only because VS supplies them.
+       Command routing tests run outside devenv and need the resolved contract DLL. -->
+  <Target Name="CopyExplorerTestInterop" AfterTargets="Build">
+    <Copy SourceFiles="@(ReferencePath->WithMetadataValue('Filename', 'Microsoft.VisualStudio.Interop'))"
+          DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

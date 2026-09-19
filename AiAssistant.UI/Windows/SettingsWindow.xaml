@@ -1,0 +1,12 @@
+<Window x:Class="AiAssistant.UI.Windows.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:AiAssistant.UI.Controls"
+        Title="ApexCode AI Settings" Height="600" Width="800"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{DynamicResource PanelBackgroundBrush}">
+    <Grid>
+        <controls:SettingsView x:Name="MainSettingsView" />
+    </Grid>
+</Window>

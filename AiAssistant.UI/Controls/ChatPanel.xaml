@@ -1,0 +1,1675 @@
+<UserControl x:Class="AiAssistant.UI.Controls.ChatPanel"
+             FocusVisualStyle="{x:Null}"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:AiAssistant.UI.Controls"
+             xmlns:helpers="clr-namespace:AiAssistant.UI.Helpers"
+             xmlns:converters="clr-namespace:AiAssistant.UI.Converters"
+             xmlns:avalonedit="http://icsharpcode.net/sharpdevelop/avalonedit"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             xmlns:viewmodels="clr-namespace:AiAssistant.UI.ViewModels">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/AiAssistant.UI;component/Themes/ControlStyles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/AiAssistant.UI;component/Themes/DarkTheme.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/AiAssistant.UI;component/Themes/ChatMarkdown.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="ReadOnlyMarkdownStyle" TargetType="local:ChatMarkdownViewer" BasedOn="{StaticResource ChatMarkdownViewerStyle}">
+                <EventSetter Event="UIElement.PreviewMouseWheel" Handler="UIElement_PreviewMouseWheel" />
+            </Style>
+            <Style x:Key="ReadOnlyTextEditorStyle" TargetType="avalonedit:TextEditor">
+                <EventSetter Event="UIElement.PreviewMouseWheel" Handler="UIElement_PreviewMouseWheel" />
+            </Style>
+
+            <!-- ─ Icon geometry ──────────────────────────────────────────────
+                 Vector glyphs replace the emoji labels the panel used before.
+                 Emoji render inconsistently across Windows versions and never
+                 pick up the theme foreground; paths do both.
+                 ──────────────────────────────────────────────────────────── -->
+            <Geometry x:Key="IconPlus">M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z</Geometry>
+            <Geometry x:Key="IconUndo">M12.5,8C9.85,8 7.45,8.99 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z</Geometry>
+            <Geometry x:Key="IconHistory">M13,3A9,9 0 0,0 4,12H1L4.89,15.89L8.78,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3M12,8V13L16.28,15.54L17,14.33L13.5,12.25V8H12Z</Geometry>
+            <Geometry x:Key="IconSettings">M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.98C19.47,12.66 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.66 4.57,12.98L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.98Z</Geometry>
+            <Geometry x:Key="IconSend">M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z</Geometry>
+            <Geometry x:Key="IconStop">M18,18H6V6H18V18Z</Geometry>
+            <Geometry x:Key="IconCopy">M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z</Geometry>
+            <Geometry x:Key="IconCheck">M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z</Geometry>
+            <Geometry x:Key="IconEdit">M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z</Geometry>
+            <Geometry x:Key="IconBookmark">M17,3H7A2,2 0 0,0 5,5V21L12,18L19,21V5C19,3.89 18.1,3 17,3Z</Geometry>
+            <Geometry x:Key="IconClose">M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z</Geometry>
+            <Geometry x:Key="IconAlert">M13,14H11V9H13M13,18H11V16H13M1,21H23L12,2L1,21Z</Geometry>
+            <Geometry x:Key="IconTune">M3,17V19H9V17H3M3,5V7H13V5H3M13,21V19H21V17H13V15H11V21H13M7,9V11H3V13H7V15H9V9H7M21,13V11H11V13H21M15,9H17V7H21V5H17V3H15V9Z</Geometry>
+            <Geometry x:Key="IconFile">M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z</Geometry>
+            <Geometry x:Key="IconSearch">M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L19.71,19L18.3,20.41L13.04,15.13C12,15.71 10.8,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z</Geometry>
+            <Geometry x:Key="IconFolder">M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z</Geometry>
+            <Geometry x:Key="IconTerminal">M20,4H4A2,2 0 0,0 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6A2,2 0 0,0 20,4M20,18H4V6H20V18M11,15L12.41,13.59L8.83,10L12.41,6.41L11,5L6,10L11,15M13,16V14H18V16H13Z</Geometry>
+            
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <local:StringNotEmptyToVisibilityConverter x:Key="StringToVis" />
+            <local:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis" />
+            <converters:IsNotNullConverter x:Key="IsNotNull" />
+
+            <!-- Enhanced Plan System UI Cards -->
+            <DataTemplate DataType="{x:Type viewmodels:PlanProposedCardViewModel}">
+                <local:PlanReviewPanel DataContext="{Binding ReviewPanelViewModel}" />
+            </DataTemplate>
+            
+            <DataTemplate DataType="{x:Type viewmodels:WalkthroughCardViewModel}">
+                <Border Background="{DynamicResource AccentSurfaceBrush}"
+                        BorderBrush="{DynamicResource AccentPrimaryBrush}"
+                        BorderThickness="1" CornerRadius="{StaticResource MediumRadius}"
+                        Padding="16" Margin="0,8,0,8">
+                    <StackPanel>
+                        <TextBlock Text="✅ Implementation Complete" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="{DynamicResource AppFontSizeOverride}"/>
+                        <TextBlock Text="The agent has completed the implementation plan. All tasks are done." 
+                                   Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewmodels:QuestionCardViewModel}">
+                <Border Background="{DynamicResource SurfaceColorBrush}"
+                        BorderBrush="{DynamicResource BorderSubtleBrush}"
+                        BorderThickness="1" CornerRadius="{StaticResource MediumRadius}"
+                        Padding="16" Margin="0,8,0,8" x:Name="CardBorder">
+                    <Grid>
+                        <!-- INTERACTIVE STATE -->
+                        <StackPanel x:Name="InteractivePanel">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <Path Data="{StaticResource IconAlert}" Width="14" Height="14" Stretch="Uniform"
+                                      Fill="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <TextBlock Text="Clarification needed" FontWeight="SemiBold" 
+                                           Foreground="{DynamicResource AccentPrimaryBrush}" FontSize="{DynamicResource SmallFontSizeOverride}" 
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <TextBlock Text="{Binding Question.Question}" 
+                                       Foreground="{DynamicResource TextPrimaryBrush}" 
+                                       FontWeight="SemiBold" TextWrapping="Wrap" 
+                                       FontSize="{DynamicResource AppFontSizeOverride}" Margin="0,0,0,16"/>
+
+                            <ItemsControl ItemsSource="{Binding Options}" Margin="0,0,0,8">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <RadioButton Content="{Binding Text}" 
+                                                     IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                                     Margin="0,0,0,8"
+                                                     GroupName="{Binding DataContext.Question.Id, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <StackPanel Visibility="{Binding Question.AllowCustomAnswer, Converter={StaticResource BoolToVis}}" Margin="0,0,0,16">
+                                <RadioButton Content="Something else" 
+                                             IsChecked="{Binding IsCustomSelected, Mode=TwoWay}"
+                                             Foreground="{DynamicResource TextPrimaryBrush}"
+                                             GroupName="{Binding Question.Id}"
+                                             Margin="0,0,0,8" />
+                                <TextBox Text="{Binding CustomAnswerText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                         Visibility="{Binding IsCustomSelected, Converter={StaticResource BoolToVis}}"
+                                         Background="{DynamicResource InputBackgroundBrush}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         BorderBrush="{DynamicResource InputBorderBrush}"
+                                         Margin="20,0,0,0" Padding="8,6" />
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                                <Button Content="Cancel" Command="{Binding CancelCommand}" 
+                                        Style="{StaticResource GhostButton}" Padding="12,6" Margin="0,0,8,0" />
+                                <Button Content="{Binding SubmitLabel}" Command="{Binding SubmitCommand}" 
+                                        Style="{StaticResource PrimaryButton}" Padding="12,6" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- READONLY STATE -->
+                        <StackPanel x:Name="ReadOnlyPanel" Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <Path Data="{StaticResource IconCheck}" Width="14" Height="14" Stretch="Uniform"
+                                      Fill="{DynamicResource TextTertiaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <TextBlock Text="Clarification resolved" FontWeight="SemiBold" 
+                                           Foreground="{DynamicResource TextTertiaryBrush}" FontSize="{DynamicResource SmallFontSizeOverride}" 
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Question.Question}" 
+                                       Foreground="{DynamicResource TextSecondaryBrush}" 
+                                       TextWrapping="Wrap" 
+                                       FontSize="{DynamicResource AppFontSizeOverride}" Margin="0,0,0,8"/>
+                            <TextBlock Text="{Binding FinalAnswerText, StringFormat='You selected: {0}'}" 
+                                       Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" 
+                                       FontSize="{DynamicResource AppFontSizeOverride}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding IsReadOnly}" Value="True">
+                        <Setter TargetName="InteractivePanel" Property="Visibility" Value="Collapsed" />
+                        <Setter TargetName="ReadOnlyPanel" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="CardBorder" Property="Background" Value="Transparent" />
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewmodels:ExecutionSummaryCardViewModel}">
+                <Border Background="{DynamicResource SurfaceColorBrush}"
+                        BorderBrush="{DynamicResource BorderSubtleBrush}"
+                        BorderThickness="1" CornerRadius="{StaticResource MediumRadius}"
+                        Padding="16" Margin="0,8,0,8">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Path Data="{StaticResource IconCheck}" Width="14" Height="14" Stretch="Uniform"
+                                  Fill="{DynamicResource SuccessGreenBrush}" VerticalAlignment="Center" Margin="0,0,8,0"
+                                  Visibility="{Binding IsFullySuccessful, Converter={StaticResource BoolToVis}}" />
+                            <Path Data="{StaticResource IconAlert}" Width="14" Height="14" Stretch="Uniform"
+                                  Fill="{DynamicResource ErrorRedBrush}" VerticalAlignment="Center" Margin="0,0,8,0"
+                                  Visibility="{Binding HasFailures, Converter={StaticResource BoolToVis}}" />
+                            <TextBlock Text="Execution Summary" FontWeight="SemiBold" 
+                                       Foreground="{DynamicResource TextPrimaryBrush}" FontSize="{DynamicResource SmallFontSizeOverride}" 
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding TotalTasks, StringFormat='Total Tasks: {0}'}" 
+                                   Foreground="{DynamicResource TextSecondaryBrush}" 
+                                   TextWrapping="Wrap" 
+                                   FontSize="{DynamicResource AppFontSizeOverride}" Margin="0,0,0,8"/>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding CompletedTasks, StringFormat='Successful: {0}'}" 
+                                       Foreground="{DynamicResource SuccessGreenBrush}" 
+                                       FontSize="{DynamicResource AppFontSizeOverride}" Margin="0,0,12,0" />
+                            
+                            <TextBlock Text="{Binding FailedTasks, StringFormat='Failed: {0}'}" 
+                                       Foreground="{DynamicResource ErrorRedBrush}" 
+                                       FontSize="{DynamicResource AppFontSizeOverride}"
+                                       Visibility="{Binding HasFailures, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </DataTemplate>
+
+            <!-- Small uppercase caption used for detail sections inside activity cards.
+                 BasedOn the implicit TextBlock style so it keeps AppFont; a keyed style
+                 with no BasedOn does not inherit from the type's default style. -->
+            <Style x:Key="SectionLabel" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="FontSize" Value="{DynamicResource SmallFontSizeOverride}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                <Setter Property="Margin" Value="0,4,0,3" />
+            </Style>
+
+            <!-- Read-only monospace payload viewer used for parameters, output and history.
+                 FIX: this is BasedOn the implicit TextBox style specifically so it inherits
+                 Foreground="{DynamicResource TextPrimaryBrush}" and the rounded-border
+                 template. Without BasedOn, a keyed style does not inherit anything from the
+                 type's default style, so Foreground fell back to WPF's default (black) and
+                 was unreadable against the dark CodeBackgroundBrush — this was the
+                 near-invisible parameter/output text. -->
+            <Style x:Key="DetailTextBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="IsReadOnly" Value="True" />
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                <Setter Property="FontFamily" Value="{DynamicResource CodeFont}" />
+                <Setter Property="FontSize" Value="{DynamicResource CodeFontSizeOverride}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+                <Setter Property="Background" Value="{DynamicResource CodeBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource CodeBorderBrush}" />
+                <Setter Property="Padding" Value="8,6" />
+                <Setter Property="Margin" Value="0,0,0,4" />
+            </Style>
+
+            <!-- Row actions stay out of the way until the entry is hovered or focused. -->
+            <Style x:Key="HoverActions" TargetType="StackPanel">
+                <Setter Property="Opacity" Value="0" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Border}}" Value="True">
+                        <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsKeyboardFocusWithin, RelativeSource={RelativeSource AncestorType=Border}}" Value="True">
+                        <Setter Property="Opacity" Value="1" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <UserControl.InputBindings>
+        <KeyBinding Key="P" Modifiers="Control+Shift" Command="{x:Static local:ChatPanel.FocusPersonaCmd}" />
+        <KeyBinding Key="D" Modifiers="Control+Shift" Command="{x:Static local:ChatPanel.FocusDatabaseCmd}" />
+    </UserControl.InputBindings>
+    <Grid x:Name="MainGrid" Background="{DynamicResource PanelBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- 0: Banners -->
+            <RowDefinition Height="Auto" /> <!-- 1: Header -->
+            <RowDefinition Height="Auto" /> <!-- 2: Scope Selectors -->
+            <RowDefinition Height="Auto" /> <!-- 3: TASK EXECUTION PANEL -->
+            <RowDefinition Height="*" />    <!-- 4: Chat History -->
+            <RowDefinition Height="Auto" /> <!-- 5: Error Banner -->
+            <RowDefinition Height="Auto" /> <!-- 6: Loading Strip -->
+            <RowDefinition Height="Auto" /> <!-- 7: Composer -->
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Notification banners.
+             Stacked rather than overlaid, so an update notice and a checkpoint
+             warning can no longer render on top of each other. -->
+        <StackPanel Grid.Row="0">
+            <Border x:Name="AutoContinueBanner"
+                    Background="{DynamicResource WarningBgBrush}"
+                    BorderBrush="{DynamicResource WarningOrangeBrush}" BorderThickness="0,0,0,1"
+                    Padding="14,8" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Path Grid.Column="0" Data="{StaticResource IconAlert}" Width="13" Height="13" Stretch="Uniform"
+                          Fill="{DynamicResource WarningOrangeBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock x:Name="AutoContinueText" Grid.Column="1"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontSize="{DynamicResource MessageFontSizeOverride}"
+                               Text="⟳ Agent was interrupted mid-task — resuming automatically…"
+                               VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,8,0" />
+                    <Button Grid.Column="2" Click="DismissAutoContinueBanner_Click"
+                            ToolTip="Dismiss"
+                            AutomationProperties.Name="Dismiss auto-continue notice"
+                            Style="{StaticResource IconButtonSmall}"
+                            Foreground="{DynamicResource WarningOrangeBrush}">
+                        <Path Data="{StaticResource IconClose}" Width="11" Height="11" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+                </Grid>
+            </Border>
+            <Border x:Name="NetworkRetryBanner"
+                    Background="{DynamicResource WarningBgBrush}"
+                    BorderBrush="{DynamicResource WarningOrangeBrush}" BorderThickness="0,0,0,1"
+                    Padding="14,8" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Path Grid.Column="0" Data="{StaticResource IconAlert}" Width="13" Height="13" Stretch="Uniform"
+                          Fill="{DynamicResource WarningOrangeBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock x:Name="NetworkRetryText" Grid.Column="1"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontSize="{DynamicResource MessageFontSizeOverride}"
+                               VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,8,0" />
+                    <Button Grid.Column="2" Click="DismissNetworkRetryBanner_Click"
+                            ToolTip="Dismiss warning"
+                            AutomationProperties.Name="Dismiss warning"
+                            Style="{StaticResource IconButtonSmall}"
+                            Foreground="{DynamicResource WarningOrangeBrush}">
+                        <Path Data="{StaticResource IconClose}" Width="11" Height="11" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <Border x:Name="UpdateNotificationBanner"
+                    Background="{DynamicResource AccentSurfaceBrush}"
+                    BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="0,0,0,1"
+                    Padding="14,8" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="UpdateNotificationText" Grid.Column="0"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontSize="{DynamicResource MessageFontSizeOverride}"
+                               VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,8,0" />
+                    <Button Grid.Column="1" Click="DismissUpdateBanner_Click"
+                            ToolTip="Dismiss update notification"
+                            AutomationProperties.Name="Dismiss update notification"
+                            Style="{StaticResource IconButtonSmall}">
+                        <Path Data="{StaticResource IconClose}" Width="11" Height="11" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <Border x:Name="CheckpointErrorBanner"
+                    Background="{DynamicResource ErrorBgBrush}"
+                    BorderBrush="{DynamicResource ErrorRedBrush}" BorderThickness="0,0,0,1"
+                    Padding="14,8" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Path Grid.Column="0" Data="{StaticResource IconAlert}" Width="13" Height="13" Stretch="Uniform"
+                          Fill="{DynamicResource ErrorRedBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock x:Name="CheckpointErrorText" Grid.Column="1"
+                               Foreground="{DynamicResource ErrorRedBrush}"
+                               FontSize="{DynamicResource MessageFontSizeOverride}"
+                               VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,8,0" />
+                    <Button Grid.Column="2" Click="DismissCheckpointError_Click"
+                            ToolTip="Dismiss warning"
+                            AutomationProperties.Name="Dismiss warning"
+                            Style="{StaticResource IconButtonSmall}"
+                            Foreground="{DynamicResource ErrorRedBrush}">
+                        <Path Data="{StaticResource IconClose}" Width="11" Height="11" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- Row 1: Header.
+             Wordmark on the left, icon-only actions on the right, and a scope
+             toggle that reveals the provider/persona/database strip in Row 2.
+             The composer below keeps only Mode and Model, since those are the
+             only two selectors that change per message. -->
+        <Border Grid.Row="1" Background="{DynamicResource PanelBackgroundBrush}"
+                BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1"
+                Padding="12,6">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- ApexCode logo -->
+                    <Image Source="pack://application:,,,/AiAssistant.UI;component/Resources/32x32.png"
+                           Width="28" Height="28" Margin="0,2,0,0" VerticalAlignment="Center" />
+                    <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="ApexCode" FontWeight="Black"
+                               FontSize="{DynamicResource AppFontSizeOverride}"
+                               Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="Segoe UI" VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" x:Name="ContextUsagePanel"
+                      Visibility="Collapsed" Height="18" Margin="0,4,0,0">
+                    <ProgressBar x:Name="TokenUsageProgressBar" Style="{StaticResource MeterProgressBar}"
+                                 Height="16" Maximum="1" Value="0" Background="{DynamicResource BorderSubtleBrush}"
+                                 Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    <TextBlock x:Name="TokenUsageText" FontSize="10" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"
+                               VerticalAlignment="Center" IsHitTestVisible="False" />
+                </Grid>
+
+                <!-- Active persona, always visible in the header regardless of whether the
+                     scope filter (provider/persona/database) is expanded or collapsed. It
+                     used to live inside that collapsible strip, which meant it disappeared
+                     along with it. -->
+                <Border x:Name="PersonaBadge" Grid.Row="0" Grid.Column="1" Visibility="Collapsed"
+                        Background="{DynamicResource AccentSurfaceBrush}"
+                        BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1"
+                        CornerRadius="9" Padding="9,3" Margin="12,0"
+                        HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="220">
+                    <TextBlock x:Name="PersonaBadgeText"
+                               Foreground="{DynamicResource AccentPrimaryBrush}"
+                               FontSize="{DynamicResource SmallFontSizeOverride}" FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
+                </Border>
+
+                <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Re-opens the plan review overlay. Before this existed, approving a plan
+                         hid it permanently and there was no way to see what had been agreed. -->
+                    <Button x:Name="ViewPlanBtn" Click="ViewPlanBtn_Click" Content="Plan" 
+                            ToolTip="View the implementation plan" ToolTipService.Placement="Bottom"
+                            Style="{StaticResource ChipButton}" Margin="0,0,8,0" Visibility="Collapsed"
+                            FontSize="{DynamicResource MessageFontSizeOverride}"
+                            AutomationProperties.Name="View the implementation plan" />
+
+                    <Button x:Name="UndoBtn" Click="UndoBtn_Click"
+                            ToolTip="Undo the last AI file modification" ToolTipService.Placement="Bottom"
+                            Style="{StaticResource IconButton}" Visibility="Collapsed"
+                            AutomationProperties.Name="Undo the last AI file modification">
+                        <Path Data="{StaticResource IconUndo}" Width="15" Height="15" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+
+                    <Button x:Name="NewSessionBtn" Click="NewSessionBtn_Click"
+                            ToolTip="Start a new chat session" ToolTipService.Placement="Bottom"
+                            Style="{StaticResource IconButton}"
+                            AutomationProperties.Name="Start a new chat session">
+                        <Path Data="{StaticResource IconPlus}" Width="15" Height="15" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+
+                    <Button x:Name="HistoryBtn" Click="HistoryBtn_Click"
+                            ToolTip="Chat history" ToolTipService.Placement="Bottom"
+                            Style="{StaticResource IconButton}"
+                            AutomationProperties.Name="Chat history">
+                        <Path Data="{StaticResource IconHistory}" Width="15" Height="15" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+
+                    <Button x:Name="SettingsBtn" Click="SettingsBtn_Click"
+                            ToolTip="Open settings" ToolTipService.Placement="Bottom"
+                            Style="{StaticResource IconButton}"
+                            AutomationProperties.Name="Open settings">
+                        <Path Data="{StaticResource IconSettings}" Width="15" Height="15" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+
+                    <!-- Reveals the provider/persona/database strip below the header.
+                         Separated from the icon actions by a hairline since it toggles
+                         a panel rather than firing an action. -->
+                    <Border Width="1" Height="16" Margin="6,0,6,0" Background="{DynamicResource BorderSubtleBrush}" />
+
+                    <ToggleButton x:Name="ScopeToggleBtn"
+                                  Click="ScopeToggleBtn_Click"
+                                  Style="{StaticResource IconToggleButton}"
+                                  ToolTip="{Binding Text, ElementName=PersonaBadgeText, TargetNullValue='Provider, persona and database', FallbackValue='Provider, persona and database'}"
+                                  AutomationProperties.Name="Show provider, persona and database selectors">
+                        <Path Data="{StaticResource IconTune}" Width="14" Height="14" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" />
+                    </ToggleButton>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Row 2: Scope selectors.
+             Provider, persona and database rarely change within a session, so they
+             sit in their own strip between the header and the conversation instead
+             of crowding the composer around the prompt itself. Laid out as a proper
+             2-column grid — each combo stretches to fill its cell — rather than a
+             left-aligned WrapPanel that left the right half of the strip empty. -->
+        <Border x:Name="ScopeSelectorPanel" Grid.Row="2" Visibility="Collapsed"
+                Background="{DynamicResource SurfaceColorBrush}"
+                BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1"
+                Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ComboBox x:Name="ProviderCombo" Grid.Row="0" Grid.Column="0" Margin="0,2,6,2"
+                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                          Style="{StaticResource ChipComboBox}"
+                          FontSize="{DynamicResource SmallFontSizeOverride}"
+                          ToolTip="LLM Provider" SelectionChanged="ProviderCombo_SelectionChanged"
+                          AutomationProperties.Name="LLM Provider" />
+
+                <ComboBox x:Name="PersonaCombo" Grid.Row="0" Grid.Column="1" Margin="6,2,0,2"
+                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                          Style="{StaticResource ChipComboBox}"
+                          FontSize="{DynamicResource SmallFontSizeOverride}"
+                          ToolTip="Active Persona (Ctrl+Shift+P)" SelectionChanged="PersonaCombo_SelectionChanged"
+                          AutomationProperties.Name="Active Persona" />
+
+                <ComboBox x:Name="DatabaseCombo" Grid.Row="1" Grid.Column="0" Margin="0,2,6,2"
+                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                          Style="{StaticResource ChipComboBox}"
+                          FontSize="{DynamicResource SmallFontSizeOverride}"
+                          ToolTip="Database Connection (Ctrl+Shift+D)" SelectionChanged="DatabaseCombo_SelectionChanged"
+                          AutomationProperties.Name="Database Connection">
+                    <ComboBoxItem Content="No DB Connections" IsSelected="True" IsEnabled="False" />
+                </ComboBox>
+            </Grid>
+        </Border>
+
+        <!-- Row 4: Conversation or welcome view -->
+        <Grid Grid.Row="4">
+            <!-- Welcome view shown when no sessions -->
+            <local:WelcomeView x:Name="WelcomeViewControl" Visibility="Collapsed"
+                               GetStarted="WelcomeView_GetStarted"
+                               ConfigureApiKeyRequested="WelcomeView_ConfigureApiKeyRequested" />
+
+            <!-- Messages list -->
+            <!-- A single virtualized list owns scrolling; do not wrap it in a ScrollViewer. -->
+            <ListBox x:Name="MessagesList" ItemsSource="{Binding Messages}" Margin="10,10,4,10"
+                     BorderThickness="0" Background="Transparent" Padding="0"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.CanContentScroll="True"
+                     VirtualizingPanel.ScrollUnit="Pixel"
+                     VirtualizingStackPanel.IsVirtualizing="True"
+                     VirtualizingStackPanel.VirtualizationMode="Standard"
+                     Loaded="MessagesList_Loaded">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <!-- Conversation entries are not selectable; clicks continue to reach their child controls. -->
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="IsTabStop" Value="False" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Top" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <ContentPresenter />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!-- A flat conversation entry. Assistant actions are rendered as a chronological
+                             trace rather than as nested bubbles. Only user turns get a tinted card, which
+                             is what separates prompt from response without any heavy chrome. -->
+                        <Border SnapsToDevicePixels="True" Margin="0,0,0,4">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="CornerRadius" Value="{StaticResource MediumRadius}" />
+                                    <Setter Property="Padding" Value="6,4,6,10" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource UserBubbleBgBrush}" />
+                                            <Setter Property="Padding" Value="10,8" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Byline: who spoke, when, and the row actions -->
+                                <Grid Grid.Row="0" Margin="0,0,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0" Width="18" Height="18" CornerRadius="5"
+                                            Background="{DynamicResource SurfaceTertiaryBrush}"
+                                            BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"
+                                            VerticalAlignment="Center" Margin="0,0,8,0">
+                                        <Grid>
+                                            <TextBlock Text="{Binding RoleInitial}" FontSize="9" FontWeight="Bold"
+                                                       Foreground="{Binding RoleBrush}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                       Visibility="{Binding IsUser, Converter={StaticResource BoolToVis}}" />
+                                            <Image Source="pack://application:,,,/AiAssistant.UI;component/Resources/16X16.png"
+                                                   Stretch="Uniform" 
+                                                   Visibility="{Binding IsUser, Converter={StaticResource InverseBoolToVis}}" />
+                                        </Grid>
+                                    </Border>
+
+                                    <TextBlock Grid.Column="1" Text="{Binding RoleName}"
+                                               FontWeight="SemiBold" FontSize="{DynamicResource MessageFontSizeOverride}"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center" />
+
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:h:mm tt}'}"
+                                                   FontSize="{DynamicResource SmallFontSizeOverride}" Foreground="{DynamicResource TextTertiaryBrush}"
+                                                   VerticalAlignment="Center" Margin="0,0,4,0" />
+
+                                        <StackPanel Orientation="Horizontal" Style="{StaticResource HoverActions}">
+                                            <Button ToolTip="Copy entire message"
+                                                    AutomationProperties.Name="Copy entire message"
+                                                    Command="{x:Static local:ChatPanel.CopyMessageCmd}"
+                                                    CommandParameter="{Binding Content}"
+                                                    Style="{StaticResource IconButtonSmall}">
+                                                <Path Data="{StaticResource IconCopy}" Width="12" Height="12" Stretch="Uniform"
+                                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                            </Button>
+
+                                            <!-- Checkpoint control (system checkpoints) -->
+                                            <Button x:Name="CheckpointBtn" ToolTip="View checkpoint options"
+                                                    AutomationProperties.Name="View checkpoint options"
+                                                    Click="CheckpointBtn_Click" Tag="{Binding}"
+                                                    Visibility="{Binding HasCheckpoint, Converter={StaticResource BoolToVis}}"
+                                                    Style="{StaticResource IconButtonSmall}"
+                                                    Foreground="{DynamicResource AccentPrimaryBrush}">
+                                                <Path Data="{StaticResource IconBookmark}" Width="12" Height="12" Stretch="Uniform"
+                                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                <Button.ContextMenu>
+                                                    <ContextMenu>
+                                                        <!--<MenuItem Header="Compare" Click="CheckpointCompare_Click" Tag="{Binding}" />-->
+                                                        <MenuItem Header="Revert chat and files" Click="CheckpointRestoreTaskWorkspace_Click" Tag="{Binding}" />
+                                                        <MenuItem Header="Revert chat only" Click="CheckpointRestoreTask_Click" Tag="{Binding}" />
+                                                        <MenuItem Header="Restore files only" Click="CheckpointRestoreWorkspace_Click" Tag="{Binding}" />
+                                                    </ContextMenu>
+                                                </Button.ContextMenu>
+                                            </Button>
+
+                                            <!-- User message edit / restore -->
+                                            <Button x:Name="UserEditBtn" ToolTip="Edit message and restore"
+                                                    AutomationProperties.Name="Edit message and restore"
+                                                    Click="UserEditBtn_Click" Tag="{Binding}"
+                                                    Visibility="{Binding IsUser, Converter={StaticResource BoolToVis}}"
+                                                    Style="{StaticResource IconButtonSmall}">
+                                                <Path Data="{StaticResource IconEdit}" Width="12" Height="12" Stretch="Uniform"
+                                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                            </Button>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Grid.Row="1">
+                                    <!-- User message edit area (hidden by default).
+                                         The code-behind resolves this by name and reads Child->Grid->Children[0],
+                                         so the Border > Grid > TextBox nesting has to stay as-is. -->
+                                    <Border x:Name="UserEditArea" Visibility="Collapsed"
+                                            Background="{DynamicResource SurfaceTertiaryBrush}"
+                                            BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"
+                                            CornerRadius="{StaticResource MediumRadius}" Padding="8" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <TextBox x:Name="UserEditTextBox" Text="{Binding Content, Mode=OneWay}"
+                                                     TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60" MaxHeight="200"
+                                                     VerticalScrollBarVisibility="Auto"
+                                                     Background="{DynamicResource InputBackgroundBrush}"
+                                                     Foreground="{DynamicResource TextPrimaryBrush}"
+                                                     BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1"
+                                                     FontFamily="{DynamicResource AppFont}"
+                                                     FontSize="{DynamicResource InputFontSizeOverride}"
+                                                     Padding="8,6" />
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                                                <Button Content="Cancel" Click="UserEditCancel_Click"
+                                                        Style="{StaticResource GhostButton}" Padding="10,4" Margin="0,0,6,0" />
+                                                <Button Content="Restore chat" Click="UserEditRestoreChat_Click" Tag="{Binding}"
+                                                        ToolTip="Truncate chat and resubmit"
+                                                        Style="{StaticResource SecondaryButton}" Padding="10,4" Margin="0,0,6,0" />
+                                                <Button Content="Restore all" Click="UserEditRestoreAll_Click" Tag="{Binding}"
+                                                        ToolTip="Revert files, truncate chat, resubmit"
+                                                        Style="{StaticResource PrimaryButton}" Padding="10,4" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                     <ItemsControl ItemsSource="{Binding Elements}">
+                                         <ItemsControl.Resources>
+                                             <DataTemplate DataType="{x:Type viewmodels:TextElement}">
+                                                 <ContentPresenter Content="{Binding}">
+                                                     <ContentPresenter.Style>
+                                                         <Style TargetType="ContentPresenter">
+                                                             <Setter Property="Visibility" Value="Visible" />
+                                                             <Style.Triggers>
+                                                                 <DataTrigger Binding="{Binding HasVisibleContent}" Value="False">
+                                                                     <Setter Property="Visibility" Value="Collapsed" />
+                                                                 </DataTrigger>
+
+                                                                 <!-- ── Code block (declared first so it wins over IsCode=False below) ── -->
+                                                                 <DataTrigger Binding="{Binding IsCode}" Value="True">
+                                                                     <Setter Property="ContentTemplate">
+                                                                         <Setter.Value>
+                                                                             <DataTemplate>
+                                                                                 <Border Background="{DynamicResource CodeBackgroundBrush}"
+                                                                                         BorderBrush="{DynamicResource CodeBorderBrush}" BorderThickness="1"
+                                                                                         CornerRadius="{StaticResource MediumRadius}" Margin="0,4,0,8">
+                                                                                     <Grid>
+                                                                                         <Grid.RowDefinitions>
+                                                                                             <RowDefinition Height="Auto" />
+                                                                                             <RowDefinition Height="*" />
+                                                                                         </Grid.RowDefinitions>
+                                                                                         <Grid Margin="10,4,4,2">
+                                                                                             <TextBlock Text="{Binding Language}"
+                                                                                                        Foreground="{DynamicResource TextTertiaryBrush}"
+                                                                                                        FontFamily="{DynamicResource CodeFont}"
+                                                                                                        FontSize="{DynamicResource SmallFontSizeOverride}" VerticalAlignment="Center" />
+                                                                                             <Button HorizontalAlignment="Right" ToolTip="Copy code block"
+                                                                                                     AutomationProperties.Name="Copy code block"
+                                                                                                     Command="{x:Static local:ChatPanel.CopyMessageCmd}"
+                                                                                                     CommandParameter="{Binding Text}"
+                                                                                                     Style="{StaticResource IconButtonSmall}">
+                                                                                                 <Path Data="{StaticResource IconCopy}" Width="11" Height="11" Stretch="Uniform"
+                                                                                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                                                             </Button>
+                                                                                         </Grid>
+                                                                                         <avalonedit:TextEditor Grid.Row="1"
+                                                                                                                helpers:AvalonEditHelper.BoundText="{Binding Text}"
+                                                                                                                helpers:AvalonEditHelper.Language="{Binding Language}"
+                                                                                                                IsReadOnly="True" ShowLineNumbers="False" Background="Transparent"
+                                                                                                                Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="{DynamicResource CodeFont}"
+                                                                                                                FontSize="{DynamicResource CodeFontSizeOverride}" Margin="10,0,10,10"
+                                                                                                                HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                                                                                                Style="{StaticResource ReadOnlyTextEditorStyle}" />
+                                                                                     </Grid>
+                                                                                 </Border>
+                                                                             </DataTemplate>
+                                                                         </Setter.Value>
+                                                                     </Setter>
+                                                                 </DataTrigger>
+
+                                                                 <DataTrigger Binding="{Binding IsCode}" Value="False">
+                                                                     <Setter Property="ContentTemplate">
+                                                                         <Setter.Value>
+                                                                             <DataTemplate>
+                                                                                 <local:ChatMarkdownViewer Markdown="{Binding Text}"
+                                                                                                           IsStreaming="{Binding IsStreaming}"
+                                                                                                           Style="{StaticResource ReadOnlyMarkdownStyle}"
+                                                                                                           Margin="0,0,0,4" />
+                                                                             </DataTemplate>
+                                                                         </Setter.Value>
+                                                                     </Setter>
+                                                                 </DataTrigger>
+                                                             </Style.Triggers>
+                                                         </Style>
+                                                     </ContentPresenter.Style>
+                                                 </ContentPresenter>
+                                             </DataTemplate>
+                                             <DataTemplate DataType="{x:Type viewmodels:ToolCallViewModel}">
+                                                 <Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}"
+                                                           Margin="0,4,0,4">
+                                                     <Expander.Style>
+                                                         <Style TargetType="Expander">
+                                                             <Setter Property="Template">
+                                                                 <Setter.Value>
+                                                                     <ControlTemplate TargetType="Expander">
+                                                                         <Border x:Name="ActivityCard" Background="Transparent"
+                                                                                 BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"
+                                                                                 CornerRadius="{StaticResource SmallRadius}"
+                                                                                 SnapsToDevicePixels="True">
+                                                                             <Grid>
+                                                                                 <Grid.RowDefinitions>
+                                                                                     <RowDefinition Height="Auto" />
+                                                                                     <RowDefinition Height="Auto" />
+                                                                                 </Grid.RowDefinitions>
+                                                                                 <ToggleButton Grid.Row="0"
+                                                                                               IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                                               Background="Transparent" BorderThickness="0" Padding="0"
+                                                                                               FocusVisualStyle="{x:Null}" Cursor="Hand">
+                                                                                     <ToggleButton.Template>
+                                                                                         <ControlTemplate TargetType="ToggleButton">
+                                                                                             <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                                                                                 <ContentPresenter Content="{TemplateBinding Content}" />
+                                                                                             </Border>
+                                                                                         </ControlTemplate>
+                                                                                     </ToggleButton.Template>
+                                                                                     <ContentPresenter Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" />
+                                                                                 </ToggleButton>
+                                                                                 <ContentPresenter x:Name="ExpandSite" Grid.Row="1" Visibility="Collapsed"
+                                                                                                   Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                                                             </Grid>
+                                                                         </Border>
+                                                                         <ControlTemplate.Triggers>
+                                                                             <Trigger Property="IsExpanded" Value="True">
+                                                                                 <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible" />
+                                                                                 <Setter TargetName="ActivityCard" Property="Background" Value="{DynamicResource AssistantBubbleBgBrush}" />
+                                                                             </Trigger>
+                                                                             <Trigger Property="IsMouseOver" Value="True">
+                                                                                 <Setter TargetName="ActivityCard" Property="BorderBrush" Value="{DynamicResource TextTertiaryBrush}" />
+                                                                             </Trigger>
+                                                                         </ControlTemplate.Triggers>
+                                                                     </ControlTemplate>
+                                                                 </Setter.Value>
+                                                             </Setter>
+                                                         </Style>
+                                                     </Expander.Style>
+                                                     <Expander.Header>
+                                                         <Grid Margin="9,6">
+                                                             <Grid.ColumnDefinitions>
+                                                                 <ColumnDefinition Width="Auto" />
+                                                                 <ColumnDefinition Width="Auto" />
+                                                                 <ColumnDefinition Width="*" />
+                                                                 <ColumnDefinition Width="Auto" />
+                                                                 <ColumnDefinition Width="Auto" />
+                                                             </Grid.ColumnDefinitions>
+                                                             <Path Grid.Column="0" Width="14" Height="14" Stretch="Uniform"
+                                                                   Fill="{Binding OperationBrush}" VerticalAlignment="Center" Margin="0,0,7,0">
+                                                                 <Path.Style>
+                                                                     <Style TargetType="Path">
+                                                                         <Setter Property="Data" Value="{StaticResource IconSettings}" />
+                                                                         <Style.Triggers>
+                                                                             <DataTrigger Binding="{Binding OperationIconKey}" Value="IconFile">
+                                                                                 <Setter Property="Data" Value="{StaticResource IconFile}" />
+                                                                             </DataTrigger>
+                                                                             <DataTrigger Binding="{Binding OperationIconKey}" Value="IconEdit">
+                                                                                 <Setter Property="Data" Value="{StaticResource IconEdit}" />
+                                                                             </DataTrigger>
+                                                                             <DataTrigger Binding="{Binding OperationIconKey}" Value="IconSearch">
+                                                                                 <Setter Property="Data" Value="{StaticResource IconSearch}" />
+                                                                             </DataTrigger>
+                                                                             <DataTrigger Binding="{Binding OperationIconKey}" Value="IconFolder">
+                                                                                 <Setter Property="Data" Value="{StaticResource IconFolder}" />
+                                                                             </DataTrigger>
+                                                                             <DataTrigger Binding="{Binding OperationIconKey}" Value="IconTerminal">
+                                                                                 <Setter Property="Data" Value="{StaticResource IconTerminal}" />
+                                                                             </DataTrigger>
+                                                                             <DataTrigger Binding="{Binding OperationIconKey}" Value="IconCopy">
+                                                                                 <Setter Property="Data" Value="{StaticResource IconCopy}" />
+                                                                             </DataTrigger>
+                                                                         </Style.Triggers>
+                                                                     </Style>
+                                                                 </Path.Style>
+                                                             </Path>
+                                                             <TextBlock Grid.Column="1" Text="{Binding OperationLabel}"
+                                                                        Foreground="{Binding OperationBrush}"
+                                                                        FontWeight="SemiBold" FontSize="{DynamicResource SmallFontSizeOverride}"
+                                                                        VerticalAlignment="Center" Margin="0,0,7,0" />
+                                                             <TextBlock Grid.Column="2"
+                                                                        FontFamily="{DynamicResource CodeFont}" FontSize="{DynamicResource SmallFontSizeOverride}"
+                                                                        VerticalAlignment="Center" Margin="0,0,8,0"
+                                                                        TextTrimming="CharacterEllipsis"
+                                                                        ToolTip="{Binding Target, Mode=OneWay}">
+                                                                 <Hyperlink Command="{x:Static local:ChatPanel.OpenFileCmd}" 
+                                                                            CommandParameter="{Binding AbsolutePath}"
+                                                                            TextDecorations="None"
+                                                                            Foreground="{DynamicResource TextSecondaryBrush}">
+                                                                     <Hyperlink.Style>
+                                                                         <Style TargetType="Hyperlink">
+                                                                             <Style.Triggers>
+                                                                                 <Trigger Property="IsEnabled" Value="False">
+                                                                                     <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+                                                                                 </Trigger>
+                                                                                 <MultiTrigger>
+                                                                                     <MultiTrigger.Conditions>
+                                                                                         <Condition Property="IsEnabled" Value="True"/>
+                                                                                         <Condition Property="IsMouseOver" Value="True"/>
+                                                                                     </MultiTrigger.Conditions>
+                                                                                     <MultiTrigger.Setters>
+                                                                                         <Setter Property="TextDecorations" Value="Underline"/>
+                                                                                         <Setter Property="Foreground" Value="{DynamicResource AccentPrimaryBrush}"/>
+                                                                                     </MultiTrigger.Setters>
+                                                                                 </MultiTrigger>
+                                                                             </Style.Triggers>
+                                                                         </Style>
+                                                                     </Hyperlink.Style>
+                                                                     <Run Text="{Binding Target, Mode=OneWay}"/>
+                                                                 </Hyperlink>
+                                                             </TextBlock>
+                                                             <TextBlock x:Name="RunningIndicator" Grid.Column="3" Text="Running"
+                                                                        Foreground="{DynamicResource AccentPrimaryBrush}"
+                                                                        FontSize="{DynamicResource SmallFontSizeOverride}" FontWeight="SemiBold" VerticalAlignment="Center"
+                                                                        Margin="0,0,8,0"
+                                                                        Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}">
+                                                                 <TextBlock.Style>
+                                                                     <Style TargetType="TextBlock">
+                                                                         <Style.Triggers>
+                                                                             <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                                                 <DataTrigger.EnterActions>
+                                                                                     <BeginStoryboard x:Name="PulseStoryboard">
+                                                                                         <Storyboard>
+                                                                                             <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                                                              From="1.0" To="0.4" Duration="0:0:0.6"
+                                                                                                              RepeatBehavior="Forever" AutoReverse="True" />
+                                                                                         </Storyboard>
+                                                                                     </BeginStoryboard>
+                                                                                 </DataTrigger.EnterActions>
+                                                                                 <DataTrigger.ExitActions>
+                                                                                     <StopStoryboard BeginStoryboardName="PulseStoryboard" />
+                                                                                 </DataTrigger.ExitActions>
+                                                                             </DataTrigger>
+                                                                         </Style.Triggers>
+                                                                     </Style>
+                                                                 </TextBlock.Style>
+                                                             </TextBlock>
+                                                             <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0"
+                                                                         Visibility="{Binding IsRunning, Converter={StaticResource InverseBoolToVis}, FallbackValue=Visible}">
+                                                                 <TextBlock Text="{Binding HeaderSummary}"
+                                                                            Foreground="{Binding StatusBrush}" FontSize="{DynamicResource SmallFontSizeOverride}"
+                                                                            TextTrimming="CharacterEllipsis" MaxWidth="150"
+                                                                            Visibility="{Binding HeaderSummary, Converter={StaticResource StringToVis}}" Margin="0,0,6,0" />
+                                                                 <StackPanel Orientation="Horizontal" Visibility="{Binding HasChangePreview, Converter={StaticResource BoolToVis}}">
+                                                                     <TextBlock Text="{Binding AddedLinesDisplay}" Foreground="{DynamicResource SuccessGreenBrush}" FontSize="{DynamicResource SmallFontSizeOverride}" Margin="0,0,6,0" Visibility="{Binding AddedLinesDisplay, Converter={StaticResource StringToVis}}" />
+                                                                     <TextBlock Text="{Binding RemovedLinesDisplay}" Foreground="{DynamicResource ErrorRedBrush}" FontSize="{DynamicResource SmallFontSizeOverride}" Margin="0,0,8,0" Visibility="{Binding RemovedLinesDisplay, Converter={StaticResource StringToVis}}" />
+                                                                     <Button Content="View Diff" Command="{x:Static local:ChatPanel.ViewDiffCmd}" CommandParameter="{Binding}" Style="{StaticResource GhostButton}" Padding="6,2" FontSize="{DynamicResource SmallFontSizeOverride}" Cursor="Hand" />
+                                                                 </StackPanel>
+                                                             </StackPanel>
+                                                             <Path Grid.Column="4" Width="8" Height="5" Stretch="Uniform"
+                                                                   Fill="Transparent" StrokeThickness="1.4"
+                                                                   Stroke="{DynamicResource TextTertiaryBrush}"
+                                                                   VerticalAlignment="Center">
+                                                                 <Path.Style>
+                                                                     <Style TargetType="Path">
+                                                                         <Setter Property="Data" Value="M0,0 L4,4 L8,0" />
+                                                                         <Style.Triggers>
+                                                                             <DataTrigger Binding="{Binding IsExpanded}" Value="True">
+                                                                                 <Setter Property="Data" Value="M0,4 L4,0 L8,4" />
+                                                                             </DataTrigger>
+                                                                         </Style.Triggers>
+                                                                     </Style>
+                                                                 </Path.Style>
+                                                             </Path>
+                                                         </Grid>
+                                                     </Expander.Header>
+                                                     <StackPanel Margin="9,0,9,9">
+                                                         <TextBlock FontFamily="{DynamicResource CodeFont}" FontSize="{DynamicResource SmallFontSizeOverride}"
+                                                                    Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,6">
+                                                             <TextBlock.Text>
+                                                                 <Binding Path="OccurredAt" StringFormat="{}{0:h:mm:ss tt}" />
+                                                             </TextBlock.Text>
+                                                         </TextBlock>
+                                                         <Border Visibility="{Binding HasChangePreview, Converter={StaticResource BoolToVis}}"
+                                                                 BorderBrush="{DynamicResource CodeBorderBrush}" BorderThickness="1"
+                                                                 CornerRadius="{StaticResource SmallRadius}" Margin="0,0,0,6"
+                                                                 ClipToBounds="True">
+                                                             <Grid>
+                                                                 <Grid.RowDefinitions>
+                                                                     <RowDefinition Height="Auto" />
+                                                                     <RowDefinition Height="Auto" />
+                                                                 </Grid.RowDefinitions>
+                                                                 <Border Grid.Row="0" Background="{DynamicResource ErrorBgBrush}" Padding="8,5"
+                                                                         Visibility="{Binding RemovedText, Converter={StaticResource StringToVis}}">
+                                                                     <TextBlock Text="{Binding RemovedText}" FontFamily="{DynamicResource CodeFont}"
+                                                                                FontSize="{DynamicResource CodeFontSizeOverride}"
+                                                                                Foreground="{DynamicResource ErrorRedBrush}" TextWrapping="Wrap" />
+                                                                 </Border>
+                                                                 <Border Grid.Row="1" Background="{DynamicResource AccentSurfaceBrush}" Padding="8,5"
+                                                                         Visibility="{Binding AddedText, Converter={StaticResource StringToVis}}">
+                                                                     <TextBlock Text="{Binding AddedText}" FontFamily="{DynamicResource CodeFont}"
+                                                                                FontSize="{DynamicResource CodeFontSizeOverride}"
+                                                                                Foreground="{DynamicResource SuccessGreenBrush}" TextWrapping="Wrap" />
+                                                                 </Border>
+                                                             </Grid>
+                                                         </Border>
+                                                         <TextBlock Text="PREVIOUS ATTEMPTS" Style="{StaticResource SectionLabel}"
+                                                                    Visibility="{Binding HasAttemptHistory, Converter={StaticResource BoolToVis}}" />
+                                                         <TextBox Text="{Binding AttemptHistory, Mode=OneWay}" MaxHeight="160"
+                                                                  Style="{StaticResource DetailTextBox}"
+                                                                  Visibility="{Binding HasAttemptHistory, Converter={StaticResource BoolToVis}}" />
+                                                         <!-- Generic Parameters -->
+                                                         <TextBlock Text="PARAMETERS" Style="{StaticResource SectionLabel}"
+                                                                    Visibility="{Binding HasDisplayParameters, Converter={StaticResource BoolToVis}}" />
+                                                         <Grid Visibility="{Binding HasDisplayParameters, Converter={StaticResource BoolToVis}}">
+                                                             <TextBox Text="{Binding ParameterDetails, Mode=OneWay}" MaxHeight="160"
+                                                                      Style="{StaticResource DetailTextBox}"
+                                                                      Visibility="{Binding IsAttemptCompletion, Converter={StaticResource InverseBoolToVis}}" />
+                                                             <local:ChatMarkdownViewer Markdown="{Binding ParameterDetails, Mode=OneWay}"
+                                                                      Margin="0,0,0,4"
+                                                                      Visibility="{Binding IsAttemptCompletion, Converter={StaticResource BoolToVis}}" />
+                                                         </Grid>
+
+                                                         <!-- Approval Controls -->
+                                                         <StackPanel Orientation="Horizontal" Margin="0,6,0,4"
+                                                                     Visibility="{Binding NeedsApproval, Converter={StaticResource BoolToVis}}">
+                                                             <Button Content="Approve" Command="{Binding ApproveCmd}"
+                                                                     Style="{StaticResource PrimaryButton}" Padding="12,4" Margin="0,0,6,0" />
+                                                             <Button Content="Reject" Command="{Binding RejectCmd}"
+                                                                     Style="{StaticResource GhostButton}" Padding="12,4" Margin="0,0,6,0" />
+                                                             <Button Content="Always allow" Command="{Binding AlwaysAllowCmd}"
+                                                                     Style="{StaticResource GhostButton}" Padding="12,4" />
+                                                         </StackPanel>
+
+                                                         <!-- Generic Output -->
+                                                         <StackPanel Visibility="{Binding HasCustomView, Converter={StaticResource InverseBoolToVis}}">
+                                                             <TextBlock Text="OUTPUT" Style="{StaticResource SectionLabel}"
+                                                                        Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}" />
+                                                             <Grid Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}">
+                                                                 <TextBox Text="{Binding ResultText, Mode=OneWay}" MaxHeight="220"
+                                                                          Style="{StaticResource DetailTextBox}"
+                                                                          Visibility="{Binding IsAttemptCompletion, Converter={StaticResource InverseBoolToVis}}" />
+                                                                 <local:ChatMarkdownViewer Markdown="{Binding ResultText, Mode=OneWay}"
+                                                                          Margin="0,0,0,4"
+                                                                          Visibility="{Binding IsAttemptCompletion, Converter={StaticResource BoolToVis}}" />
+                                                             </Grid>
+                                                         </StackPanel>
+
+                                                         <!-- Custom Views -->
+                                                         <StackPanel Visibility="{Binding HasCustomView, Converter={StaticResource BoolToVis}}">
+                                                             <TextBlock Text="OUTPUT" Style="{StaticResource SectionLabel}"
+                                                                        Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}" />
+                                                             
+                                                             <TextBox Text="{Binding TerminalOutput, Mode=OneWay}" MaxHeight="300"
+                                                                      Style="{StaticResource DetailTextBox}"
+                                                                      Background="#1E1E1E" Foreground="#D4D4D4"
+                                                                      Visibility="{Binding IsShellExecution, Converter={StaticResource BoolToVis}}" />
+                                                                      
+                                                             <TextBox Text="{Binding CustomExpandedViewText, Mode=OneWay}" MaxHeight="300"
+                                                                      Style="{StaticResource DetailTextBox}"
+                                                                      Visibility="{Binding IsShellExecution, Converter={StaticResource InverseBoolToVis}}" />
+                                                         </StackPanel>
+                                                     </StackPanel>
+                                                 </Expander>
+                                             </DataTemplate>
+                                          </ItemsControl.Resources>
+                                      </ItemsControl>
+
+                                    <ProgressBar IsIndeterminate="True" Height="2" Margin="0,6,0,0"
+                                                 Visibility="{Binding IsStreaming, Converter={StaticResource BoolToVis}}"
+                                                 Foreground="{DynamicResource AccentPrimaryBrush}"
+                                                 Background="Transparent" BorderThickness="0" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ListBox>
+
+            <!-- New-chat loading overlay.
+                 Shown immediately when the user clicks "New Chat" so the panel
+                 never appears frozen during the async DB session reset.
+                 ZIndex 100 keeps it above the message list and the welcome view
+                 without fighting the plan-review / history overlays (ZIndex 110+). -->
+            <Border x:Name="NewChatLoadingOverlay"
+                    Background="{DynamicResource PanelBackgroundBrush}"
+                    Panel.ZIndex="100"
+                    Visibility="Collapsed"
+                    AutomationProperties.Name="ApexCode is starting a new chat">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid Width="64" Height="64" HorizontalAlignment="Center">
+                    <Image Source="pack://application:,,,/AiAssistant.UI;component/Resources/32x32.png"
+                           Width="32" Height="32" Stretch="Uniform"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           AutomationProperties.Name="ApexCode logo" />
+                <Path Data="M 32,2 A 30,30 0 1,1 2,32"
+                      Stroke="{DynamicResource AccentPrimaryBrush}" StrokeThickness="4"
+                      Width="64" Height="64" Stretch="None"
+                      HorizontalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform><RotateTransform /></Path.RenderTransform>
+                    <Path.Style>
+                        <Style TargetType="Path">
+                            <Style.Triggers>
+                                <Trigger Property="IsVisible" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard x:Name="NewChatSpinStoryboard">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                 From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <RemoveStoryboard BeginStoryboardName="NewChatSpinStoryboard" />
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+                </Grid>
+                <TextBlock Text="ApexCode" Margin="0,16,0,0"
+                           HorizontalAlignment="Center" FontSize="20" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="Starting new chat&#x2026;" Margin="0,6,0,0"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="{DynamicResource AppFontSizeOverride}" />
+            </StackPanel>
+            </Border>
+
+        </Grid>
+
+        <!-- Paused turns retain recovery actions even when details are dismissed. -->
+        <Border x:Name="AgentPauseBanner" Grid.Row="5" Margin="10,0,10,6" Padding="10"
+                BorderBrush="#D7A449" Background="#302818" BorderThickness="1" CornerRadius="6" Visibility="Collapsed">
+            <StackPanel>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="Dismiss" Click="DismissPause_Click"
+                            Style="{StaticResource GhostButton}" Padding="8,4" />
+                    <TextBlock Text="Agent paused" Foreground="#E8BC68" FontWeight="SemiBold" VerticalAlignment="Center" />
+                </DockPanel>
+                <StackPanel x:Name="PauseBody">
+                    <TextBlock x:Name="PauseSummary" Foreground="#E8BC68" TextWrapping="Wrap" Margin="0,6,0,6" />
+                    <Expander x:Name="PauseDetailsExpander" Header="View details" Foreground="#E8BC68">
+                        <ScrollViewer MaxHeight="180" VerticalScrollBarVisibility="Auto">
+                            <TextBox x:Name="PauseDetails" IsReadOnly="True" TextWrapping="Wrap" BorderThickness="0"
+                                     Background="Transparent" Foreground="#E8BC68" />
+                        </ScrollViewer>
+                    </Expander>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button x:Name="ContinueAgentButton" Content="Continue" Click="ContinueAgent_Click"
+                            Style="{StaticResource PrimaryButton}" Padding="12,6" Margin="0,0,8,0" />
+                    <Button x:Name="PauseGuidanceButton" Content="Add guidance" Click="PauseGuidance_Click"
+                            Style="{StaticResource SecondaryButton}" Padding="12,6" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Row 5: Error message banner -->
+        <Border x:Name="ErrorBanner"
+                Grid.Row="5"
+                Background="{DynamicResource ErrorBgBrush}"
+                BorderBrush="{DynamicResource ErrorRedBrush}"
+                BorderThickness="1"
+                CornerRadius="{StaticResource MediumRadius}"
+                Margin="10,0,10,6"
+                Padding="10,6"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Path Grid.Column="0" Data="{StaticResource IconAlert}" Width="13" Height="13" Stretch="Uniform"
+                      Fill="{DynamicResource ErrorRedBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock x:Name="ErrorTextBlock"
+                           Grid.Column="1"
+                           Text="{Binding ErrorMessage, Mode=OneWay}"
+                           Foreground="{DynamicResource ErrorRedBrush}"
+                           FontSize="{DynamicResource MessageFontSizeOverride}"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Center" />
+                <Button x:Name="ErrorCloseBtn"
+                        Grid.Column="2"
+                        ToolTip="Dismiss error message"
+                        AutomationProperties.Name="Dismiss error message"
+                        Style="{StaticResource IconButtonSmall}"
+                        Foreground="{DynamicResource ErrorRedBrush}"
+                        Margin="8,0,0,0"
+                        VerticalAlignment="Center"
+                        Click="ErrorCloseBtn_Click">
+                    <Path Data="{StaticResource IconClose}" Width="11" Height="11" Stretch="Uniform"
+                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Row 6: Loading status strip -->
+        <Border x:Name="ThinkingAnimationPanel"
+                Grid.Row="6"
+                Background="Transparent"
+                Padding="12,0,12,6"
+                Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Image Source="pack://application:,,,/AiAssistant.UI;component/Resources/16x16.png" Width="16" Height="16" Stretch="Uniform" RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform><RotateTransform /></Image.RenderTransform>
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Style.Triggers>
+                                <Trigger Property="IsVisible" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard x:Name="PulseStoryboardRow6">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="0:0:1.2" RepeatBehavior="Forever" />
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1.0" To="0.3" Duration="0:0:0.8" RepeatBehavior="Forever" AutoReverse="True" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <RemoveStoryboard BeginStoryboardName="PulseStoryboardRow6" />
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+                <TextBlock Foreground="{DynamicResource TextTertiaryBrush}"
+                           FontSize="{DynamicResource SmallFontSizeOverride}"
+                           Margin="6,0,0,0"
+                           VerticalAlignment="Center"
+                           Text="Thinking..." />
+            </StackPanel>
+        </Border>
+
+        <!-- Row 7: Composer.
+             One rounded card holds the prompt, the two selectors that change per
+             message (mode and model), a token meter and the send control. Provider,
+             persona and database live in the header strip instead, since they are
+             not properties of a single message. -->
+        <Border Grid.Row="7" Background="{DynamicResource PanelBackgroundBrush}" Padding="8,4,8,8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="GuidanceHint" Grid.Row="0"
+                           Text="Your next message will resume the agent."
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="{DynamicResource SmallFontSizeOverride}"
+                           FontFamily="{DynamicResource AppFont}"
+                           TextWrapping="Wrap" Margin="6,0,6,6" Visibility="Collapsed" />
+                <Border x:Name="ComposerBorder" Grid.Row="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                            <Setter Property="CornerRadius" Value="{StaticResource LargeRadius}" />
+                            <Setter Property="SnapsToDevicePixels" Value="True" />
+                            <Style.Triggers>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter Property="BorderBrush" Value="{DynamicResource BorderFocusBrush}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Prompt -->
+                        <Grid Grid.Row="0">
+                            <avalonedit:TextEditor x:Name="MessageTextBox"
+                                                   WordWrap="True"
+                                                   MinHeight="26"
+                                                   MaxHeight="180"
+                                                   Padding="10,7,10,2"
+                                                   Background="Transparent"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                                   BorderThickness="0"
+                                                   AllowDrop="True"
+                                                   PreviewKeyDown="MessageTextBox_KeyDown"
+                                                   TextChanged="MessageTextBox_TextChanged"
+                                                   FontSize="{DynamicResource InputFontSizeOverride}"
+                                                   FontFamily="{DynamicResource AppFont}"
+                                                   GotFocus="MessageTextBox_GotFocus"
+                                                   LostFocus="MessageTextBox_LostFocus"
+                                                   PreviewDragEnter="MessageTextBox_PreviewDragEnter"
+                                                   PreviewDragOver="MessageTextBox_PreviewDragOver"
+                                                   PreviewDragLeave="MessageTextBox_PreviewDragLeave"
+                                                   PreviewDrop="MessageTextBox_PreviewDrop"
+                                                   ShowLineNumbers="False"
+                                                   HorizontalScrollBarVisibility="Disabled"
+                                                   VerticalScrollBarVisibility="Auto" />
+
+                            <TextBlock x:Name="MessagePlaceholder"
+                                       Text="Ask anything, @ to add a file"
+                                       Foreground="{DynamicResource TextTertiaryBrush}"
+                                       FontSize="{DynamicResource InputFontSizeOverride}"
+                                       FontFamily="{DynamicResource AppFont}"
+                                       VerticalAlignment="Top"
+                                       Padding="14,7,10,2"
+                                       IsHitTestVisible="False"
+                                       Focusable="False"
+                                       TextTrimming="CharacterEllipsis" />
+                                       
+                            <TextBlock x:Name="QaPlaceholderTextBlock" 
+                                       Text="Answer the agent's question to resume execution..." 
+                                       Foreground="#EDA200" 
+                                       IsHitTestVisible="False" 
+                                       Focusable="False"
+                                       VerticalAlignment="Center" 
+                                       Margin="15,0,0,0" 
+                                       FontSize="{DynamicResource InputFontSizeOverride}"
+                                       Visibility="Collapsed" />
+
+                            <ProgressBar x:Name="StreamingProgressBar"
+                                         VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                                         IsIndeterminate="True"
+                                         Height="2"
+                                         Visibility="Collapsed"
+                                         Foreground="{DynamicResource AccentPrimaryBrush}"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Margin="10,0,10,0" />
+
+                            <Popup x:Name="MentionPopup"
+                                   Placement="Top"
+                                   PlacementTarget="{Binding ElementName=MessageTextBox}"
+                                   StaysOpen="True"
+                                   IsOpen="False"
+                                   MaxHeight="240"
+                                   MinWidth="240"
+                                   AllowsTransparency="True"
+                                   Panel.ZIndex="200"
+                                   Closed="MentionPopup_Closed">
+                                <Border Background="{DynamicResource SurfaceColorBrush}"
+                                        BorderBrush="{DynamicResource BorderSubtleBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="{StaticResource MediumRadius}"
+                                        MaxHeight="240"
+                                        Padding="3">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.35" Color="Black" />
+                                    </Border.Effect>
+                                    <ListBox x:Name="MentionListBox"
+                                             FontSize="{DynamicResource InputFontSizeOverride}"
+                                             FontFamily="{DynamicResource AppFont}"
+                                             SelectionMode="Single"
+                                             MouseLeftButtonUp="MentionListBox_MouseLeftButtonUp"
+                                             KeyDown="MentionListBox_KeyDown">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Margin="2,1">
+                                                    <Run Text="{Binding FileName, Mode=OneWay}" FontWeight="SemiBold" />
+                                                    <Run Text="  " />
+                                                    <Run Text="{Binding DirectoryName, Mode=OneWay}" Foreground="{DynamicResource TextTertiaryBrush}" FontSize="{DynamicResource SmallFontSizeOverride}" />
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsPlaceholder}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                                                                    <Setter Property="FontStyle" Value="Italic" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
+                            </Popup>
+                        </Grid>
+
+                        <!-- Primary footer: only the two selectors that change per message.
+                             Everything else is one click away behind the scope toggle in the
+                             header. Mode and Model sit in a fixed-column Grid rather than a
+                             WrapPanel — a WrapPanel reflows as soon as its neighbours change
+                             width, which is exactly what happened once a loaded chat made the
+                             token counter non-empty: it widened, stole space from the wrap
+                             panel, and pushed Model onto its own row. Fixed columns cannot
+                             be squeezed by a sibling, so this can't recur. -->
+                        <Grid Grid.Row="1" Margin="6,0,6,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox x:Name="ModeCombo" Grid.Column="0" Width="88" Margin="0,1,4,1"
+                                      Style="{StaticResource ChipComboBox}"
+                                      FontSize="{DynamicResource SmallFontSizeOverride}"
+                                      ToolTip="{Binding Text, ElementName=ModeHintText}"
+                                      SelectionChanged="ModeCombo_SelectionChanged"
+                                      AutomationProperties.Name="Agent Mode">
+                                <ComboBoxItem Content="Plan Mode" Tag="Plan" IsSelected="True" />
+                                <ComboBoxItem Content="Act Mode" Tag="Act" />
+                            </ComboBox>
+
+                            <local:ModelPickerControl x:Name="ModelPicker" Grid.Column="1" MinWidth="90" MaxWidth="220"
+                                                      HorizontalAlignment="Left" Margin="0,1,8,1"
+                                                      ToolTip="LLM Model" FontSize="{DynamicResource SmallFontSizeOverride}"
+                                                      RetryClicked="ModelPicker_RetryClicked"
+                                                      SelectedModelChanged="ModelPicker_SelectedModelChanged" />
+
+                            <!-- Kept in the tree because the code-behind writes its Text; it is
+                                 surfaced as the mode chip's tooltip rather than a line of footer
+                                 copy. -->
+                            <TextBlock x:Name="ModeHintText" Visibility="Collapsed"
+                                       Text="Read-only: proposes a plan for your review" />
+
+                            <Grid Grid.Column="3" VerticalAlignment="Center">
+                                <Button x:Name="SendButton"
+                                        Click="SendButton_Click"
+                                        ToolTip="Send message (Enter)"
+                                        AutomationProperties.Name="Send message"
+                                        Style="{StaticResource AccentIconButton}">
+                                    <Path Data="{StaticResource IconSend}" Width="15" Height="15" Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+
+                                <!-- Shown only while a response is generating. Bound to the same
+                                     cancellation source that backs the current SendMessageAsync call. -->
+                                <Button x:Name="StopButton"
+                                        Click="StopButton_Click"
+                                        ToolTip="Stop generating"
+                                        AutomationProperties.Name="Stop generating"
+                                        Style="{StaticResource NeutralIconButton}"
+                                        Visibility="Collapsed">
+                                    <Path Data="{StaticResource IconStop}" Width="11" Height="11" Stretch="Uniform"
+                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                </Button>
+                            </Grid>
+                        </Grid>
+
+                    </Grid>
+                </Border>
+
+                <!-- Highlighted drop zone shown while dragging a file over the composer.
+                     IsHitTestVisible="False" so it never intercepts the drag/drop events
+                     meant for MessageTextBox. -->
+                <Border x:Name="DropTargetBorder" Grid.Row="1"
+                        BorderBrush="{DynamicResource AccentPrimaryBrush}"
+                        BorderThickness="2"
+                        CornerRadius="{StaticResource LargeRadius}"
+                        Background="{DynamicResource AccentSurfaceBrush}"
+                        IsHitTestVisible="False"
+                        Visibility="Collapsed" />
+            </Grid>
+        </Border>
+        <!-- Row 3: Task Execution Panel -->
+        <local:TaskExecutionPanel x:Name="TaskExecutionPanel" Grid.Row="3" Visibility="{Binding HasActiveExecution, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}" />
+
+
+
+        <!-- Overlay: Plan Review.
+             DataContext is the PlanReviewViewModel, so every reviewer edit (per-step comments and
+             the shared instructions box) is bound state rather than something scraped back out of
+             the visual tree. That is what lets the comments reach both the "Request Revision" and
+             the "Approve & Execute" payloads, and what keeps them intact when the overlay is
+             closed and reopened from the "Plan" button in the header. -->
+        <Border x:Name="PlanApprovalOverlay" Grid.Row="3" Grid.RowSpan="5" Background="#E61E1E1E"
+                Visibility="Collapsed" Panel.ZIndex="110">
+            <Grid Margin="14" DataContext="{Binding PlanReview}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Header: title, revision, status, and a way out that keeps the plan available -->
+                <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Implementation Plan" FontSize="{DynamicResource AppFontSizeOverride}" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                        <Border Background="{DynamicResource SurfaceTertiaryBrush}" CornerRadius="9"
+                                Padding="8,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RevisionLabel}" FontSize="{DynamicResource SmallFontSizeOverride}"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </Border>
+                        <Border Background="{DynamicResource SurfaceTertiaryBrush}" CornerRadius="9"
+                                Padding="8,2" Margin="6,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusText}" FontSize="{DynamicResource SmallFontSizeOverride}"
+                                       FontWeight="SemiBold" Foreground="{Binding StatusBrush}" />
+                        </Border>
+                    </StackPanel>
+                    <Button x:Name="ClosePlanReviewBtn" Grid.Column="1"
+                            
+                            ToolTip="Back to chat. The plan stays available from the &quot;Plan&quot; button in the header."
+                            AutomationProperties.Name="Close plan review and return to chat"
+                            Style="{StaticResource IconButton}">
+                        <Path Data="{StaticResource IconClose}" Width="13" Height="13" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                    </Button>
+                </Grid>
+
+                <TextBlock Grid.Row="1" Text="{Binding GuidanceText}" TextWrapping="Wrap" Margin="0,0,0,10"
+                           FontSize="{DynamicResource MessageFontSizeOverride}" Foreground="{DynamicResource TextSecondaryBrush}" />
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Border Grid.Column="0" Background="{DynamicResource CodeBackgroundBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="{StaticResource MediumRadius}">
+                        <wv2:WebView2 x:Name="PlanMarkdownViewer" />
+                    </Border>
+                    
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" Background="Transparent" />
+                    
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl x:Name="PlanItemsControl" ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1"
+                                            Background="Transparent"
+                                            CornerRadius="{StaticResource MediumRadius}" Margin="0,0,0,6" Padding="12,10">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Width="20" Height="20" CornerRadius="6"
+                                                        Background="{DynamicResource AccentSurfaceBrush}"
+                                                        BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1"
+                                                        Margin="0,0,8,0" VerticalAlignment="Top">
+                                                    <TextBlock Text="{Binding StepLabel}" FontSize="{DynamicResource SmallFontSizeOverride}"
+                                                               FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <TextBlock Grid.Column="1" Text="{Binding Title}" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap"
+                                                           VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="2" Text="note added" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                           FontSize="{DynamicResource SmallFontSizeOverride}"
+                                                           Foreground="{DynamicResource AccentPrimaryBrush}"
+                                                           Visibility="{Binding HasComment, Converter={StaticResource BoolToVis}}" />
+                                                <Button Grid.Column="3" Content="Comment" 
+                                                        Style="{StaticResource ChipButton}" Margin="8,0,0,0"
+                                                        FontSize="{DynamicResource SmallFontSizeOverride}"
+                                                        ToolTip="Add or edit your feedback for this step"
+                                                        AutomationProperties.Name="Toggle feedback editor for this step" />
+                                            </Grid>
+
+                                            <TextBlock Grid.Row="1" Text="{Binding Description}" Foreground="{DynamicResource TextSecondaryBrush}"
+                                                       Margin="28,6,0,0" TextWrapping="Wrap"
+                                                       FontSize="{DynamicResource MessageFontSizeOverride}" />
+
+                                            <!-- Inline comment editor. Two-way bound, so collapsing it or
+                                                 re-realising the template never loses what was typed. -->
+                                            <TextBox Grid.Row="2" Margin="28,8,0,0"
+                                                     Text="{Binding Comment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     Visibility="{Binding IsCommentVisible, Converter={StaticResource BoolToVis}}"
+                                                     IsReadOnly="{Binding IsReadOnly}"
+                                                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" MaxHeight="180"
+                                                     VerticalScrollBarVisibility="Auto"
+                                                     FontSize="{DynamicResource InputFontSizeOverride}"
+                                                     FontFamily="{DynamicResource AppFont}"
+                                                     Background="{DynamicResource InputBackgroundBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                                                     BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="8,6"
+                                                     AutomationProperties.Name="Feedback for this plan step" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- Instructions that apply to the plan as a whole rather than to one step -->
+                <StackPanel Grid.Row="3" Margin="0,10,0,0">
+                    <TextBlock Text="ADDITIONAL INSTRUCTIONS (OPTIONAL)" Style="{StaticResource SectionLabel}" />
+                    <TextBox x:Name="PlanGeneralCommentBox" Margin="0,2,0,0"
+                             Text="{Binding GeneralComment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             IsReadOnly="{Binding IsReadOnly}"
+                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="52" MaxHeight="120"
+                             VerticalScrollBarVisibility="Auto"
+                             FontSize="{DynamicResource InputFontSizeOverride}"
+                             FontFamily="{DynamicResource AppFont}"
+                             Background="{DynamicResource InputBackgroundBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource InputBorderBrush}" BorderThickness="1" Padding="8,6"
+                             AutomationProperties.Name="Additional instructions for the whole plan" />
+                </StackPanel>
+
+                <!-- In-overlay validation. The panel's error banner sits underneath this
+                     overlay in the z-order, so problems raised here have to be reported inline. -->
+                <Border Grid.Row="4" Margin="0,10,0,0" Padding="10,6"
+                        Background="{DynamicResource ErrorBgBrush}"
+                        BorderBrush="{DynamicResource ErrorRedBrush}" BorderThickness="1"
+                        CornerRadius="{StaticResource SmallRadius}"
+                        Visibility="{Binding ValidationMessage, Converter={StaticResource StringToVis}}">
+                    <TextBlock Text="{Binding ValidationMessage}" TextWrapping="Wrap"
+                               FontSize="{DynamicResource MessageFontSizeOverride}"
+                               Foreground="{DynamicResource ErrorRedBrush}" />
+                </Border>
+
+                <Grid Grid.Row="5" Margin="0,12,0,0">
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" TextWrapping="Wrap"
+                               FontSize="{DynamicResource MessageFontSizeOverride}" Foreground="{DynamicResource TextTertiaryBrush}"
+                               Text="This plan has already been decided and is shown for reference."
+                               Visibility="{Binding IsReadOnly, Converter={StaticResource BoolToVis}}" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                Visibility="{Binding IsActionable, Converter={StaticResource BoolToVis}}">
+                        <Button x:Name="SendPlanFeedbackBtn" Content="Request revision"
+                                
+                                IsEnabled="{Binding CanInteract}"
+                                ToolTip="Send your comments back to the agent and get a revised plan. No files are modified."
+                                AutomationProperties.Name="Request a revised plan using my feedback"
+                                Style="{StaticResource SecondaryButton}" Margin="0,0,8,0" Padding="12,6" />
+                        <Button x:Name="ApprovePlanBtn" Content="Approve &amp; execute"
+                                
+                                IsEnabled="{Binding CanInteract}"
+                                ToolTip="Switch to Act mode and implement this plan, including your comments"
+                                AutomationProperties.Name="Approve the plan and execute it in Act mode"
+                                Style="{StaticResource PrimaryButton}" Padding="12,6" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Overlay: History Panel -->
+        <Border x:Name="HistoryOverlay" Grid.Row="0" Grid.RowSpan="8" Background="{DynamicResource PanelBackgroundBrush}" Visibility="Collapsed" Panel.ZIndex="150"
+                VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <local:HistoryPanel x:Name="HistoryPanelControl" />
+        </Border>
+
+        <!-- Covers the chat during the complete history conversation load. -->
+        <Border x:Name="ConversationLoadingOverlay" Grid.Row="0" Grid.RowSpan="8"
+                Background="{DynamicResource PanelBackgroundBrush}"
+                Visibility="Collapsed" Panel.ZIndex="200"
+                AutomationProperties.Name="ApexCode is loading the conversation">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid Width="64" Height="64" HorizontalAlignment="Center">
+                    <Image Source="pack://application:,,,/AiAssistant.UI;component/Resources/32x32.png"
+                           Width="32" Height="32" Stretch="Uniform"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           AutomationProperties.Name="ApexCode logo" />
+                <Path Data="M 32,2 A 30,30 0 1,1 2,32"
+                      Stroke="{DynamicResource AccentPrimaryBrush}" StrokeThickness="4"
+                      Width="64" Height="64" Stretch="None"
+                      HorizontalAlignment="Center" RenderTransformOrigin="0.5,0.5">
+                    <Path.RenderTransform><RotateTransform /></Path.RenderTransform>
+                    <Path.Style>
+                        <Style TargetType="Path">
+                            <Style.Triggers>
+                                <Trigger Property="IsVisible" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard x:Name="ConversationLoadingSpin">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                 From="0" To="360" Duration="0:0:1" RepeatBehavior="Forever" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <RemoveStoryboard BeginStoryboardName="ConversationLoadingSpin" />
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+                </Grid>
+                <TextBlock Text="ApexCode" Margin="0,16,0,0"
+                           HorizontalAlignment="Center" FontSize="20" FontWeight="Bold"
+                           Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="Loading conversation&#x2026;" Margin="0,6,0,0"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           FontSize="{DynamicResource AppFontSizeOverride}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Overlay: Settings Panel -->
+        <Border x:Name="SettingsOverlay" Grid.Row="0" Grid.RowSpan="8" Background="{DynamicResource PanelBackgroundBrush}" Visibility="Collapsed" Panel.ZIndex="150"
+                VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <local:SettingsView x:Name="SettingsViewControl" />
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,30 @@
+<Window x:Class="AiAssistant.UI.Windows.ApprovalDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tool Execution Approval" SizeToContent="Height" MaxHeight="600" Width="500"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource PanelBackgroundBrush}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Text="ApexCode wants to execute a tool:" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,16"/>
+        
+        <Border Grid.Row="1" Background="{DynamicResource CodeBackgroundBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="{StaticResource MediumRadius}" Padding="16" MaxHeight="300">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="DescriptionText" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontFamily="{DynamicResource AppFont}"/>
+            </ScrollViewer>
+        </Border>
+        
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+            <Button Content="Approve" Style="{DynamicResource PrimaryButton}" Margin="0,0,12,0" Click="ApproveBtn_Click" IsDefault="True"/>
+            <Button Content="Reject" Style="{DynamicResource SecondaryButton}" Margin="0,0,12,0" Click="RejectBtn_Click" IsCancel="True"/>
+            <Button Content="Always Allow" Style="{DynamicResource GhostButton}" Click="AlwaysAllowBtn_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

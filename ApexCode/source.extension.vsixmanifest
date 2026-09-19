@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="ApexCode.d77fe20a-94ec-49f0-b1c6-725eb519f998" Version="1.1" Language="en-US" Publisher="Kushal Meharwade" />
+    <DisplayName>ApexCode AI Assistant</DisplayName>
+    <Description>AI coding assistant for Visual Studio. Chat with 7+ LLM providers using your own API key, get Roslyn-aware code fixes, query SQL Server safely, and manage sessions — all inside the IDE.</Description>
+    <License>LICENSE.txt</License>
+    <GettingStartedGuide>GettingStarted.md</GettingStartedGuide>
+    <ReleaseNotes>ReleaseNotes.md</ReleaseNotes>
+    <Icon>Resources/logo_90.png</Icon>
+    <PreviewImage>Resources/logo_90.png</PreviewImage>
+    <Tags>AI, AI Assistant, Copilot, Chatbot, LLM, Code Assistant, Productivity, OpenAI, Azure OpenAI, DeepSeek, Gemini, OpenRouter, SQL Server, Database, Roslyn</Tags>
+  </Metadata>
+  <Installation>
+    <!-- VS 2022 and VS 2026 -->
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 19.0)">
+      <ProductArchitecture>amd64</ProductArchitecture>
+    </InstallationTarget>
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" Version="[4.7.2,)" d:Source="Manual" />
+  </Dependencies>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" DisplayName="Visual Studio core editor" Version="[17.0,19.0)" />
+  </Prerequisites>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" d:Source="Project" d:ProjectName="%CurrentProject%" />
+  </Assets>
+</PackageManifest>

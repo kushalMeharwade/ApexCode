@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable"
+             xmlns:xi="http://www.w3.org/2001/XInclude">
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Include href="KnownImageIds.vsct"/>
+
+  <Commands package="guidAiAssistantPackage">
+    <Menus>
+      <Menu guid="guidAiAssistantCmdSet" id="AiAssistantMenu" priority="0x0600" type="Menu">
+        <Parent guid="guidAiAssistantCmdSet" id="TopLevelMenuGroup"/>
+        <Strings>
+          <MenuText>ApexCode</MenuText>
+          <ButtonText>ApexCode</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
+
+    <Groups>
+      <Group guid="guidAiAssistantCmdSet" id="TopLevelMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+      </Group>
+      <Group guid="guidAiAssistantCmdSet" id="MenuGroup" priority="0x0600">
+        <Parent guid="guidAiAssistantCmdSet" id="AiAssistantMenu"/>
+      </Group>
+      <Group guid="guidAiAssistantCmdSet" id="ToolbarGroup" priority="0x0000">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_TOOL_STANDARD"/>
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidAiAssistantCmdSet" id="ChatCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidAiAssistantCmdSet" id="MenuGroup"/>
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Open Chat Panel</ButtonText>
+          <LocCanonicalName>AIAssistant.OpenChat</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="guidAiAssistantCmdSet" id="SettingsCommandId" priority="0x0200" type="Button">
+        <Parent guid="guidAiAssistantCmdSet" id="MenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="Settings" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Settings</ButtonText>
+          <LocCanonicalName>AIAssistant.Settings</LocCanonicalName>
+        </Strings>
+      </Button>
+
+    </Buttons>
+
+    <Bitmaps>
+      <Bitmap guid="guidImages" href="..\AiAssistant.UI\Resources\16X16.png" usedList="bmpPic1"/>
+    </Bitmaps>
+  </Commands>
+
+  <KeyBindings>
+    <KeyBinding guid="guidAiAssistantCmdSet" id="ChatCommandId"
+                editor="guidVSStd97"
+                key1="F12" mod1="Control"/>
+    <KeyBinding guid="guidAiAssistantCmdSet" id="SettingsCommandId"
+                editor="guidVSStd97"
+                key1="O" mod1="Control Shift"/>
+
+  </KeyBindings>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidAiAssistantCmdSet" id="ChatCommandId" priority="0x0100">
+      <Parent guid="guidAiAssistantCmdSet" id="ToolbarGroup"/>
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name="guidAiAssistantPackage" value="{26737c4c-cf02-418d-9185-4bbc9518b5a9}" />
+    <GuidSymbol name="guidAiAssistantCmdSet" value="{c5e8b1d9-7e2f-4a3b-9c4d-8b6a5e4d3c2b}">
+      <IDSymbol name="MenuGroup" value="0x1000"/>
+      <IDSymbol name="AiAssistantMenu" value="0x1020"/>
+      <IDSymbol name="ChatCommandId" value="0x0100"/>
+      <IDSymbol name="SettingsCommandId" value="0x0200"/>
+      <IDSymbol name="LogCommandId" value="0x0102"/>
+      <IDSymbol name="FocusPersonaCmdId" value="0x0300"/>
+      <IDSymbol name="FocusDatabaseCmdId" value="0x0400"/>
+      <IDSymbol name="FocusInputCmdId" value="0x0500"/>
+      <IDSymbol name="PipelineCommandId" value="0x0600"/>
+      <IDSymbol name="OptionsCommandId" value="0x0700"/>
+      <IDSymbol name="ToolbarGroup" value="0x1030"/>
+      <IDSymbol name="TopLevelMenuGroup" value="0x1040"/>
+    </GuidSymbol>
+    <GuidSymbol name="guidImages" value="{7db9138d-0a25-4c07-9572-c233157e3f89}">
+      <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
+    <!-- guidSHLMainMenu is the VS main menu bar — values taken directly from
+         vsshlids.h in Microsoft.VSSDK.BuildTools 17.14.2094
+         (tools\vssdk\inc\vsshlids.h lines 643 and 577 respectively). -->
+    <GuidSymbol name="guidSHLMainMenu" value="{d309f791-903f-11d0-9efc-00a0c911004f}">
+      <IDSymbol name="IDM_VS_MENU_TOOLS"       value="0x0085"/>
+      <IDSymbol name="IDM_VS_TOOL_STANDARD"    value="0x0001"/>
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
+

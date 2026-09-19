@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS8632;CS8618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DiffPlex" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
+    <ProjectReference Include="..\AiAssistant.Core\AiAssistant.Core.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  <PackageReference Include="Microsoft.VisualStudio.SDK" ExcludeAssets="runtime" NoWarn="NU1604" /></ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AiAssistant.Llm\AiAssistant.Llm.csproj" />
+  </ItemGroup>
+
+</Project>

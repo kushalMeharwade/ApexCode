@@ -1,0 +1,39 @@
+<Window x:Class="AiAssistant.UI.Windows.QueryApprovalDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SQL Query Approval" SizeToContent="Height" MaxHeight="600" Width="600"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        Background="{DynamicResource PanelBackgroundBrush}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Text="ApexCode wants to execute the following SQL query:" FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,16"/>
+        
+        <Border Grid.Row="1" Background="{DynamicResource CodeBackgroundBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="1" CornerRadius="{StaticResource MediumRadius}">
+            <TextBox x:Name="QueryTextBox" 
+                     IsReadOnly="True" 
+                     TextWrapping="Wrap" 
+                     AcceptsReturn="True" 
+                     VerticalScrollBarVisibility="Auto" 
+                     FontFamily="Consolas, Courier New, monospace" 
+                     Background="Transparent" 
+                     Foreground="{DynamicResource TextPrimaryBrush}"
+                     BorderThickness="0"
+                     Padding="16" MaxHeight="300" />
+        </Border>
+        
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+            <Button Content="Execute" Style="{DynamicResource PrimaryButton}" Margin="0,0,12,0" Click="ExecuteBtn_Click" IsDefault="True">
+                <Button.Background>
+                    <SolidColorBrush Color="{DynamicResource SuccessGreen}" />
+                </Button.Background>
+            </Button>
+            <Button Content="Cancel" Style="{DynamicResource SecondaryButton}" Click="CancelBtn_Click" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

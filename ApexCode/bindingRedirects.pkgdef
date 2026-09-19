@@ -1,0 +1,218 @@
+﻿// =============================================================================
+// Binding redirects for ApexCode VSIX extension.
+//
+// These redirects are defined manually here instead of via
+// [assembly: ProvideBindingRedirection(...)] attributes because the VSSDK
+// CreatePkgDef tool has a known bug: its version string parser cannot handle
+// version components with more than one digit (e.g., "10.0.0.10" fails).
+// This file is included directly in the VSIX via <VSIXSourceItem> and is
+// merged into the extension's .pkgdef at install time.
+//
+// Format reference:
+//   [$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{GUID}]
+//   "name"="AssemblyName"
+//   "publicKeyToken"="TOKEN"
+//   "culture"="neutral"
+//   "oldVersion"="0.0.0.0-NEW"
+//   "newVersion"="NEW"
+//   "codeBase"="$PackageFolder$\AssemblyName.dll"
+//
+// Assembly versions verified by inspecting the actual DLLs in bin\Debug
+// via [System.Reflection.AssemblyName]::GetAssemblyName().
+// =============================================================================
+
+// --- Microsoft.Extensions.* (assembly version 10.0.0.10) ---------------------
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0001-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.DependencyInjection"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.DependencyInjection.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0002-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.DependencyInjection.Abstractions"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.DependencyInjection.Abstractions.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0003-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.Logging"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.Logging.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0004-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.Logging.Abstractions"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.Logging.Abstractions.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0005-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.Hosting"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.Hosting.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0006-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.Hosting.Abstractions"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.Hosting.Abstractions.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0007-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.Options"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.Options.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0008-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.Primitives"
+"publicKeyToken"="adb9793829ddae60"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.Primitives.dll"
+
+// --- Microsoft.Extensions.AI (assembly version 10.8.0.0) ---------------------
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0010-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.AI"
+"publicKeyToken"="31bf3856ad364e35"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.8.0.0"
+"newVersion"="10.8.0.0"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.AI.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0011-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.AI.Abstractions"
+"publicKeyToken"="31bf3856ad364e35"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.8.0.0"
+"newVersion"="10.8.0.0"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.AI.Abstractions.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0012-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.AI.OpenAI"
+"publicKeyToken"="31bf3856ad364e35"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.8.0.0"
+"newVersion"="10.8.0.0"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.AI.OpenAI.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0013-0000-0000-000000000001}]
+"name"="Microsoft.Extensions.AI.Ollama"
+"publicKeyToken"="31bf3856ad364e35"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-9.7.0.0"
+"newVersion"="9.7.0.0"
+"codeBase"="$PackageFolder$\Microsoft.Extensions.AI.Ollama.dll"
+
+// --- System.* runtime helpers (legacy stable versions) ------------------------
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0020-0000-0000-000000000001}]
+"name"="Microsoft.Bcl.AsyncInterfaces"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\Microsoft.Bcl.AsyncInterfaces.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0021-0000-0000-000000000001}]
+"name"="System.Text.Json"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\System.Text.Json.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0022-0000-0000-000000000001}]
+"name"="System.Text.Encodings.Web"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\System.Text.Encodings.Web.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0023-0000-0000-000000000001}]
+"name"="System.Diagnostics.DiagnosticSource"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-10.0.0.10"
+"newVersion"="10.0.0.10"
+"codeBase"="$PackageFolder$\System.Diagnostics.DiagnosticSource.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0024-0000-0000-000000000001}]
+"name"="System.Threading.Tasks.Extensions"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-4.2.4.0"
+"newVersion"="4.2.4.0"
+"codeBase"="$PackageFolder$\System.Threading.Tasks.Extensions.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0025-0000-0000-000000000001}]
+"name"="System.Runtime.CompilerServices.Unsafe"
+"publicKeyToken"="b03f5f7f11d50a3a"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-6.0.3.0"
+"newVersion"="6.0.3.0"
+"codeBase"="$PackageFolder$\System.Runtime.CompilerServices.Unsafe.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0026-0000-0000-000000000001}]
+"name"="System.Memory"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-4.0.5.0"
+"newVersion"="4.0.5.0"
+"codeBase"="$PackageFolder$\System.Memory.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0027-0000-0000-000000000001}]
+"name"="System.Buffers"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-4.0.5.0"
+"newVersion"="4.0.5.0"
+"codeBase"="$PackageFolder$\System.Buffers.dll"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0028-0000-0000-000000000001}]
+"name"="System.Numerics.Vectors"
+"publicKeyToken"="b03f5f7f11d50a3a"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-4.1.6.0"
+"newVersion"="4.1.6.0"
+"codeBase"="$PackageFolder$\System.Numerics.Vectors.dll"
+
+// --- Azure SDK (Azure.Core 1.44.1.0 required by Azure.AI.OpenAI 2.1.0) ---------
+// Without this redirect the VS Designer Cache ships Azure.Core 1.43.0.0, which
+// is missing the Response.get_Content() method → MissingMethodException at runtime.
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0040-0000-0000-000000000001}]
+"name"="Azure.Core"
+"publicKeyToken"="92742159e12e44c8"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-1.44.1.0"
+"newVersion"="1.44.1.0"
+"codeBase"="$PackageFolder$\Azure.Core.dll"
+
+// --- ML.Tokenizers (package 2.0.0 ships with AssemblyVersion 1.0.0.0) ---------
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{A1B2C3D4-0030-0000-0000-000000000001}]
+"name"="Microsoft.ML.Tokenizers"
+"publicKeyToken"="cc7b13ffcd2ddd51"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-1.0.0.0"
+"newVersion"="1.0.0.0"
+"codeBase"="$PackageFolder$\Microsoft.ML.Tokenizers.dll"

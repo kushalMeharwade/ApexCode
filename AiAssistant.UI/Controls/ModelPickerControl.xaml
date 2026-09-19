@@ -1,0 +1,195 @@
+<UserControl x:Class="AiAssistant.UI.Controls.ModelPickerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             x:Name="Root">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- The Main ComboBox-like button -->
+        <!-- Chip-style trigger so the picker sits flush with the other composer
+             selectors instead of drawing its own input box. -->
+        <ToggleButton x:Name="DropdownToggle" 
+                      HorizontalContentAlignment="Stretch"
+                      Background="Transparent"
+                      BorderBrush="Transparent"
+                      BorderThickness="1"
+                      Foreground="{DynamicResource TextSecondaryBrush}"
+                      Padding="8,3"
+                      Cursor="Hand"
+                      FocusVisualStyle="{x:Null}"
+                      Click="DropdownToggle_Click">
+            <ToggleButton.Template>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="chipRoot"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding SelectedModel.DisplayName, ElementName=Root, FallbackValue='Select a model...'}" 
+                                       VerticalAlignment="Center" 
+                                       Foreground="{TemplateBinding Foreground}"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <Path x:Name="chipArrow" Grid.Column="1"
+                                  Data="M0,0 L3.5,3.5 L7,0"
+                                  Fill="Transparent"
+                                  Stroke="{DynamicResource TextTertiaryBrush}"
+                                  StrokeThickness="1.3"
+                                  Width="7" Height="3.5"
+                                  Margin="6,1,2,0"
+                                  VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="chipRoot" Property="Background" Value="{DynamicResource SurfaceTertiaryBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                            <Setter TargetName="chipArrow" Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="chipRoot" Property="Background" Value="{DynamicResource SurfaceTertiaryBrush}" />
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="chipRoot" Property="BorderBrush" Value="{DynamicResource BorderFocusBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </ToggleButton.Template>
+        </ToggleButton>
+
+        <!-- The Popup -->
+        <Popup x:Name="ModelPopup" 
+               IsOpen="{Binding IsChecked, ElementName=DropdownToggle}" 
+               StaysOpen="False" 
+               PlacementTarget="{Binding ElementName=DropdownToggle}" 
+               Placement="Top" 
+               Width="360"
+               MaxHeight="400"
+               AllowsTransparency="True"
+               PopupAnimation="Fade">
+            <!-- Opens upward: the picker now lives in the composer footer at the
+                 bottom of the panel, so a downward popup would be clipped. -->
+            <Border Background="{DynamicResource SurfaceColorBrush}"
+                    BorderBrush="{DynamicResource BorderSubtleBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Margin="0,0,0,4"
+                    Padding="0">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.35" Color="Black" />
+                </Border.Effect>
+                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Search Box -->
+                    <Border Grid.Row="0" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="8">
+                        <TextBox x:Name="SearchBox" 
+                                 Background="{DynamicResource InputBackgroundBrush}"
+                                 Foreground="{DynamicResource TextPrimaryBrush}"
+                                 BorderThickness="1"
+                                 BorderBrush="{DynamicResource BorderSubtleBrush}"
+                                 Padding="4"
+                                 TextChanged="SearchBox_TextChanged"
+                                 Tag="Search models..." />
+                    </Border>
+
+                    <!-- Filters -->
+                    <Border Grid.Row="1" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="8,4" Background="{DynamicResource SurfaceTertiaryBrush}">
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="FreeOnlyCheck" Content="Free Only" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Checked="Filter_Changed" Unchecked="Filter_Changed" Margin="0,0,12,0" />
+                            <ComboBox x:Name="SortCombo" Width="100" SelectionChanged="Filter_Changed">
+                                <ComboBoxItem Content="Sort: Name" IsSelected="True" Tag="Name" />
+                                <ComboBoxItem Content="Sort: Price" Tag="Price" />
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Error / Loading State -->
+                    <Border x:Name="StatusBorder" Grid.Row="2" Padding="8" Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock x:Name="StatusText" Text="Loading models..." Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" HorizontalAlignment="Center" Margin="0,0,0,8" />
+                            <Button x:Name="RetryButton" Content="Retry" Click="RetryButton_Click" Style="{DynamicResource SecondaryButton}" Padding="12,5" HorizontalAlignment="Center" Visibility="Collapsed" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- List View -->
+                    <ListView x:Name="ModelList" 
+                              Grid.Row="3"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              SelectionMode="Single"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              SelectionChanged="ModelList_SelectionChanged"
+                              MaxHeight="300">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="8,6" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderSubtleBrush}" />
+                                <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding DisplayName}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" ToolTip="{Binding ModelId}" />
+                                    
+                                    <Border Grid.Row="0" Grid.Column="1" Background="{DynamicResource SuccessGreenBrush}" CornerRadius="2" Padding="4,0" Visibility="{Binding IsFree, Converter={StaticResource BoolToVis}}" Margin="4,0,0,0">
+                                        <TextBlock Text="FREE" FontSize="9" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                    </Border>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding ContextWindowTokens, StringFormat='{}{0:N0} ctx'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{Binding InputPricePerMToken, StringFormat='{}${0:N2}/M in'}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding InputPricePerMToken}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>
