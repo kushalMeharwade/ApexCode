@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0e0b15">
+  <title>ApexCode | BYOK AI Coding Assistant for Visual Studio</title>
+  <meta name="description" content="ApexCode is a bring-your-own-key AI coding assistant and Cline alternative for Visual Studio. Review plans, approve edits, and work with C# and SQL Server in your IDE.">
+  <link rel="canonical" href="https://kushalmeharwade.github.io/ApexCode/">
+  <link rel="icon" href="./assets/apexcode.png" type="image/png">
+  <link rel="stylesheet" href="./styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ApexCode">
+  <meta property="og:title" content="ApexCode | Your AI coding assistant for Visual Studio">
+  <meta property="og:description" content="Bring your own API key. Review the plan. Build inside Visual Studio.">
+  <meta property="og:url" content="https://kushalmeharwade.github.io/ApexCode/">
+  <meta property="og:image" content="https://kushalmeharwade.github.io/ApexCode/assets/apexcode-social.jpg">
+  <meta property="og:image:alt" content="Illustrated ApexCode Plan Mode beside a C# editor">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ApexCode AI Assistant",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Windows",
+    "url": "https://kushalmeharwade.github.io/ApexCode/",
+    "installUrl": "https://marketplace.visualstudio.com/items?itemName=KushalMeharwade.ApexCode2026",
+    "description": "A bring-your-own-key AI coding assistant for Visual Studio.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <script src="./analytics-config.js" defer></script>
+  <script src="./site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a href="./" class="brand"><img src="./assets/apexcode.png" width="34" height="34" alt="">ApexCode</a>
+      <nav aria-label="Main navigation">
+        <a href="#workflow">Workflow</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a class="button button-small button-quiet" href="https://marketplace.visualstudio.com/items?itemName=KushalMeharwade.ApexCode2026">Download</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span></span> Built for Microsoft Visual Studio</p>
+        <h1 id="hero-title">Your AI coding assistant <em>for Visual Studio.</em></h1>
+        <p class="lede">Bring your own API key, review what the assistant plans to change, then put it to work in your solution.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="https://marketplace.visualstudio.com/items?itemName=KushalMeharwade.ApexCode2026">Download from Marketplace</a>
+          <a class="button button-quiet" href="#workflow">Explore the workflow</a>
+        </div>
+        <p class="compatibility">Free extension · Provider usage charges may apply</p>
+      </div>
+      <figure class="hero-figure" id="product-preview">
+        <div class="preview-frame">
+          <picture>
+            <source srcset="./assets/apexcode-workspace-800.webp 800w, ./assets/apexcode-workspace.webp 1440w" sizes="(max-width: 700px) 92vw, (max-width: 1220px) 92vw, 1160px" type="image/webp">
+            <img src="./assets/apexcode-social.jpg" width="1200" height="800" alt="Illustration of the ApexCode chat panel showing a plan for changes alongside a C# editor." fetchpriority="high" decoding="async">
+          </picture>
+        </div>
+        <figcaption>Illustrated product preview based on the ApexCode interface</figcaption>
+      </figure>
+    </section>
+
+    <section class="providers" aria-labelledby="providers-title">
+      <div class="shell">
+        <h2 id="providers-title">Connect the provider you already use</h2>
+        <ul><li>OpenAI</li><li>Azure OpenAI</li><li>OpenRouter</li><li>DeepSeek</li><li>Gemini</li><li>NVIDIA</li><li>Vercel</li></ul>
+      </div>
+    </section>
+
+    <section class="shell section" id="workflow" aria-labelledby="workflow-title">
+      <div class="section-heading">
+        <h2 id="workflow-title">From question to code change</h2>
+        <p>Follow a sample ApexCode workflow for fixing an order validation bug.</p>
+      </div>
+      <div class="workflow">
+        <div class="workflow-controls" role="group" aria-label="Choose a workflow step" hidden>
+          <button type="button" data-step="plan" aria-pressed="true" aria-controls="plan-preview"><strong>Plan</strong><span>Explore your solution and review the proposed changes.</span></button>
+          <button type="button" data-step="act" aria-pressed="false" aria-controls="act-preview"><strong>Act</strong><span>Approve the plan and let ApexCode apply it.</span></button>
+          <button type="button" data-step="review" aria-pressed="false" aria-controls="review-preview"><strong>Review</strong><span>Inspect the diff and restore a checkpoint if needed.</span></button>
+        </div>
+        <div class="workflow-display">
+          <div class="window-bar"><img src="./assets/apexcode.png" alt="" width="25" height="25"><span>ApexCode</span><span class="window-caption">Sample workflow</span></div>
+          <article class="workflow-preview" id="plan-preview">
+            <p class="message message-user">Why can an empty order be saved?</p>
+            <div class="message message-assistant"><h3>Proposed plan</h3><ol><li>Trace the save path in <code>OrderService.cs</code>.</li><li>Add validation before saving.</li><li>Cover the empty order with a test.</li></ol></div>
+            <p class="workflow-state"><span></span> Plan Mode · Waiting for approval</p>
+          </article>
+          <article class="workflow-preview" id="act-preview">
+            <p class="message message-user">Apply the approved plan.</p>
+            <div class="message message-assistant"><h3>Changes applied</h3><p>Added a validation guard in <code>OrderService.cs</code> and a regression test in <code>OrderServiceTests.cs</code>.</p></div>
+            <p class="workflow-state"><span></span> Act Mode · Ready to review</p>
+          </article>
+          <article class="workflow-preview" id="review-preview">
+            <p class="message message-user">Show me the change.</p>
+            <div class="message message-assistant"><h3>OrderService.cs</h3><pre class="diff"><code>+ if (order.Items.Count == 0)
++     throw new InvalidOperationException();</code></pre></div>
+            <p class="workflow-state"><span></span> Workspace checkpoint available</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell section features" id="features" aria-labelledby="features-title">
+      <div class="section-heading"><h2 id="features-title">Built around your solution</h2><p>Use the model you choose with the tools you already rely on in Visual Studio.</p></div>
+      <div class="feature-grid">
+        <article><span class="feature-mark" aria-hidden="true">⌘</span><h3>Bring your own key</h3><p>Connect a supported provider, refresh its model list, and choose the model for your session.</p></article>
+        <article><span class="feature-mark" aria-hidden="true">{ }</span><h3>Roslyn-aware fixes</h3><p>Use compiler diagnostics and C# syntax information to understand errors and apply fixes.</p></article>
+        <article><span class="feature-mark" aria-hidden="true">▤</span><h3>Read-only SQL Server queries</h3><p>Inspect schemas and run validated read-only queries when your work spans code and data.</p></article>
+        <article><span class="feature-mark" aria-hidden="true">±</span><h3>Checkpoint and diff review</h3><p>See which files changed and restore a workspace snapshot when you need to undo an edit.</p></article>
+      </div>
+      <div class="approval-detail">
+        <div>
+          <h3>See when your plan is approved and complete</h3>
+          <p>Open an approved plan from the chat to revisit the agreed work. ApexCode shows a completion card when the implementation tasks are done.</p>
+        </div>
+        <figure>
+          <img src="./assets/apexcode-approval.webp" width="800" height="410" loading="lazy" decoding="async" alt="Illustrated ApexCode cards showing an approved order-validation plan and its completion status.">
+          <figcaption>Illustrated plan approval and completion cards</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="shell section faq" id="faq" aria-labelledby="faq-title">
+      <div class="section-heading"><h2 id="faq-title">Questions about ApexCode</h2></div>
+      <div class="faq-list">
+        <details>
+          <summary>Is ApexCode a Cline alternative for Visual Studio?</summary>
+          <p>Yes. ApexCode offers a similar plan-and-act workflow inside Microsoft Visual Studio, with bring-your-own-key model access, C# diagnostics, and checkpoint review. <a href="https://docs.cline.bot/getting-started/installing-cline">Cline’s installation guide</a> lists its supported IDEs and other ways to use Cline.</p>
+        </details>
+        <details>
+          <summary>Which version of Visual Studio do I need?</summary>
+          <p>The current ApexCode package targets Visual Studio 2026 on Windows (x64). Check the Marketplace listing and installer for the requirements of the available release.</p>
+        </details>
+        <details>
+          <summary>Do I need an ApexCode subscription?</summary>
+          <p>ApexCode is free to install. You supply an API key for a supported provider, and that provider bills you according to your plan and model usage.</p>
+        </details>
+        <details>
+          <summary>How do I start using the extension?</summary>
+          <p>Install ApexCode from the Marketplace. In Visual Studio, open View → Other Windows → ApexCode AI Assistant. In ApexCode Settings, choose a provider, add your key, and select a model.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="shell install" aria-labelledby="install-title">
+      <h2 id="install-title">Try ApexCode in Visual Studio</h2>
+      <p>Install the extension, connect your provider, and start with a question about your solution.</p>
+      <a class="button button-primary" href="https://marketplace.visualstudio.com/items?itemName=KushalMeharwade.ApexCode2026">Download from Marketplace</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <a href="./" class="brand"><img src="./assets/apexcode.png" width="32" height="32" alt="">ApexCode</a>
+      <small class="visit-stat">Site visits <span id="visit-count" role="status">Unavailable</span></small>
+      <a href="https://github.com/kushalMeharwade/ApexCode">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>
